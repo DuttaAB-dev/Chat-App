@@ -9,5 +9,6 @@
   <modules>
   	<module>chat-proto</module>
   	<module>chat-server</module>
+  	<module>chat-client</module>
   </modules>
 </project>
