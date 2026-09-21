@@ -1,8 +1,8 @@
 package com.anisala.chat.server;
 
-import com.anisala.chat.grpc.ChatServiceGrpc;
-import com.anisala.chat.grpc.MessageRequest;
-import com.anisala.chat.grpc.MessageResponse;
+import com.anisala.chat.proto.ChatServiceGrpc;
+import com.anisala.chat.proto.SendMessageRequest;
+import com.anisala.chat.proto.SendMessageResponse;
 
 import io.grpc.stub.StreamObserver;
 
@@ -11,8 +11,8 @@ public class ChatServiceImpl
 
     @Override
     public void sendMessage(
-            MessageRequest request,
-            StreamObserver<MessageResponse> responseObserver) {
+            SendMessageRequest request,
+            StreamObserver<SendMessageResponse> responseObserver) {
 
         System.out.println(
                 "Message received:"
@@ -30,8 +30,8 @@ public class ChatServiceImpl
                 "Message: " + request.getMessage()
         );
 
-        MessageResponse response =
-                MessageResponse.newBuilder()
+        SendMessageResponse response =
+                SendMessageResponse.newBuilder()
                         .setSuccess(true)
                         .setMessage("Message received by server")
                         .build();
