@@ -31,21 +31,24 @@ public class ChatServer {
         }
     }
 
-    public void blockUntilShutdown()
-            throws InterruptedException {
+    public void blockUntilShutdown() throws InterruptedException {
 
         if (server != null) {
             server.awaitTermination();
         }
     }
 
-    public static void main(String[] args)
-            throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         ChatServer server = new ChatServer();
 
         server.start();
 
         server.blockUntilShutdown();
+        
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down gRPC server...");
+            server.stop();
+        }));
     }
 }

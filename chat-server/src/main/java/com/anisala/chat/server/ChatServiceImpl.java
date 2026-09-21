@@ -10,9 +10,7 @@ public class ChatServiceImpl
         extends ChatServiceGrpc.ChatServiceImplBase {
 
     @Override
-    public void sendMessage(
-            SendMessageRequest request,
-            StreamObserver<SendMessageResponse> responseObserver) {
+    public void sendMessage(SendMessageRequest request, StreamObserver<SendMessageResponse> responseObserver) {
 
         System.out.println(
                 "Message received:"

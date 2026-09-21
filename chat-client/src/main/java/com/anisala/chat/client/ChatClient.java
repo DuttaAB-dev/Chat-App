@@ -11,21 +11,18 @@ public class ChatClient {
 
     public static void main(String[] args) {
 
-        ManagedChannel channel =
-                ManagedChannelBuilder
-                        .forAddress("localhost", 50051)
-                        .usePlaintext()
-                        .build();
+        ManagedChannel channel =ManagedChannelBuilder
+                        		.forAddress("localhost", 50051)
+                        		.usePlaintext()
+                        		.build();
 
-        ChatServiceGrpc.ChatServiceBlockingStub stub =
-                ChatServiceGrpc.newBlockingStub(channel);
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(channel);
 
-        SendMessageRequest request =
-                SendMessageRequest.newBuilder()
-                        .setSender("Alice")
-                        .setReceiver("Bob")
-                        .setMessage("Hello Bob!")
-                        .build();
+        SendMessageRequest request = SendMessageRequest.newBuilder()
+        							.setSender("Alice")
+        							.setReceiver("Bob")
+        							.setMessage("Hello Bob!")
+        							.build();
 
         SendMessageResponse response =
                 stub.sendMessage(request);
