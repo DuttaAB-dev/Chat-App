@@ -8,7 +8,7 @@ package com.anisala.chat.server.model;
 
 
 
-public class ChatMessage {
+public class Message {
 	private String senderUname;
 	private String receiverUname;
 	private String message;

@@ -4,13 +4,13 @@ import io.grpc.stub.StreamObserver;
 
 public class Session {
 	private String userName;
-	private StreamObserver<ChatMessage> chatStream;
+	private StreamObserver<Message> chatStream;
 	
 	
-	public StreamObserver<ChatMessage> getChatStream() {
+	public StreamObserver<Message> getChatStream() {
 		return chatStream;
 	}
-	public void setChatStream(StreamObserver<ChatMessage> chatStream) {
+	public void setChatStream(StreamObserver<Message> chatStream) {
 		this.chatStream = chatStream;
 	}
 	public String getUserName() {
