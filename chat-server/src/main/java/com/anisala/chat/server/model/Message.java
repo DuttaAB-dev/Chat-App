@@ -6,43 +6,41 @@ package com.anisala.chat.server.model;
 //	string message = 3;
 //}
 
-
+import java.time.Instant;
 
 public class Message {
 	private String senderUname;
 	private String receiverUname;
 	private String message;
-	private String timestamp;
+	private Instant timestamp;
 	//possibly add chat id and use proper java type for timestamp later
-	
+
+	public Message(String senderUname, String receiverUname, String message) {
+		this.senderUname = senderUname;
+		this.receiverUname = receiverUname;
+		this.message = message;
+		this.timestamp = Instant.now();
+	}
 	public String getSenderUname() {
 		return senderUname;
 	}
-	public void setSenderUname(String senderUname) {
-		this.senderUname = senderUname;
-	}
+
 	public String getReceiverUname() {
 		return receiverUname;
 	}
-	public void setReceiverUname(String receiverUname) {
-		this.receiverUname = receiverUname;
-	}
+
 	public String getMessage() {
 		return message;
 	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	public String getTimestamp() {
+
+	public Instant getTimestamp() {
 		return timestamp;
 	}
-	public void setTimestamp(String timestamp) {
-		this.timestamp = timestamp;
-	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 }

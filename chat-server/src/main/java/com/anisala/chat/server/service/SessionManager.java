@@ -7,7 +7,7 @@ import com.anisala.chat.server.model.Session;
 
 public class SessionManager {
 
-	private Map<String, Session> sessionContainer = new HashMap();
+	private Map<String, Session> sessionContainer = new HashMap<>();
 	
 	public void addSession(Session session) {
 		sessionContainer.put(session.getUserName(), session);
@@ -20,14 +20,8 @@ public class SessionManager {
 	}
 	
 	public boolean removeSession(String userName) {
-		try {
-			sessionContainer.remove(userName);
-			return true;
-		}
+		return sessionContainer.remove(userName) != null;
 		
-		catch(Exception e){
-			return false;
-		}
 	}
 	
 	public boolean isOnline(String userName) {
