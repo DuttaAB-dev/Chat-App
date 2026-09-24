@@ -1,18 +1,25 @@
 package com.anisala.chat.server.service;
-
 import com.anisala.chat.server.model.Session;
 
-public interface InnerSessionManager {
-
-	
+public interface SessionManager {
+    void createSession(Session session);
+    void removeSession(String userName);
+    Session getSession(String userName);
 }
 
-public interface SessionManager{
-    public Session getSession(String userName);
-    public void addSession(Session session);
-    public boolean removeSession(String userName);
-    public boolean isOnline(String userName);
-}
+
+
+
+// package com.anisala.chat.server.service;
+// 
+// import com.anisala.chat.server.model.Session;
+// 
+// public interface SessionManager{
+//     public Session getSession(String userName);
+//     public void addSession(Session session);
+//     public boolean removeSession(String userName);
+//     public boolean isOnline(String userName);
+// }
 
 
 

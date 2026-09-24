@@ -15,11 +15,11 @@ public class Message {
 	private Instant timestamp;
 	//possibly add chat id and use proper java type for timestamp later
 
-	public Message(String senderUname, String receiverUname, String message) {
+	public Message(String senderUname, String receiverUname, String message, Instant timestamp) {
 		this.senderUname = senderUname;
 		this.receiverUname = receiverUname;
 		this.message = message;
-		this.timestamp = Instant.now();
+		this.timestamp = timestamp;
 	}
 	public String getSenderUname() {
 		return senderUname;

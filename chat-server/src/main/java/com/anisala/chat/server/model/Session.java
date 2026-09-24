@@ -20,11 +20,11 @@ public class Session {
 	// 	this.chatStream = chatStream;
 	// }
 
-	public Session(String userName, LocalDateTime lastActive, LocalDateTime createdAt, String ipAddress) {
+	public Session(String userName, LocalDateTime createdAt, LocalDateTime lastActive, String ipAddress) {
 		this.userName = userName;
 		this.ipAddress = ipAddress;
-		this.lastActive = lastActive;
 		this.createdAt = createdAt;
+		this.lastActive = lastActive;
 		// this.messageListener = messageListener;
 	}
 	
@@ -44,6 +44,10 @@ public class Session {
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
+	}
+
+	public void updateActivity() {
+		this.lastActive = LocalDateTime.now();
 	}
 // 
 // 	public Consumer<Message> getMessageListener() {
