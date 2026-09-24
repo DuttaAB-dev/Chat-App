@@ -1,16 +1,17 @@
 package com.anisala.chat.server.model;
 
 import java.time.LocalDateTime;
-import java.util.function.Consumer;
+// import java.util.function.Consumer;
 
 // import io.grpc.stub.StreamObserver;
 
 public class Session {
 	private String userName;
 	// private StreamObserver<Message> chatStream;
+	private String ipAddress;
 	private LocalDateTime lastActive;
 	private LocalDateTime createdAt;
-	private Consumer<Message> messageListener;
+	// private Consumer<Message> messageListener;
 	
 	// public StreamObserver<Message> getChatStream() {
 	// 	return chatStream;
@@ -19,13 +20,20 @@ public class Session {
 	// 	this.chatStream = chatStream;
 	// }
 
-	public Session(String userName, LocalDateTime lastActive, LocalDateTime createdAt, Consumer<Message> messageListener) {
+	public Session(String userName, LocalDateTime lastActive, LocalDateTime createdAt, String ipAddress) {
 		this.userName = userName;
+		this.ipAddress = ipAddress;
 		this.lastActive = lastActive;
 		this.createdAt = createdAt;
-		this.messageListener = messageListener;
+		// this.messageListener = messageListener;
 	}
 	
+
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
 	public String getUserName() {
 		return userName;
 	}
@@ -37,14 +45,14 @@ public class Session {
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
-
-	public Consumer<Message> getMessageListener() {
-		return messageListener;
-	}
-	public void deliver(Message message) {
-	    if(messageListener != null) {
-	        messageListener.accept(message);
-	    }
-	}
+// 
+// 	public Consumer<Message> getMessageListener() {
+// 		return messageListener;
+// 	}
+// 	public void deliver(Message message) {
+// 	    if(messageListener != null) {
+// 	        messageListener.accept(message);
+// 	    }
+// 	}
 }
 
