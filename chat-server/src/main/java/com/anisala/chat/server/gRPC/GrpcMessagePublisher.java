@@ -1,3 +1,4 @@
+// Currently not used
 package com.anisala.chat.server.gRPC;
 
 import com.anisala.chat.proto.ChatMessage;

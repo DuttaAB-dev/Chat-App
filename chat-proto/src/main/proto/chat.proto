@@ -19,8 +19,8 @@ service ChatService {
     rpc ChatStream(stream ChatMessage)
     	returns (stream ChatMessage);
     
-    rpc LogIn(LoginRequest)
-    	returns (LoginResponse);
+    rpc LogIn(LogInRequest)
+    	returns (LogInResponse);
     
     // rpc MetaData(MetaDataRequest)
     	// returns (MetaDataResponse);
@@ -62,11 +62,11 @@ message ChatMessage{
 	google.protobuf.Timestamp time_stamp = 4;
 }
 
-message LoginRequest{
+message LogInRequest{
 	string user_name = 1;
 }
 
-message LoginResponse{
+message LogInResponse{
 	bool success = 1;
 	string user_name = 2;
 	string name = 3;

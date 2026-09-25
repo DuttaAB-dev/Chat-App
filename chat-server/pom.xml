@@ -1,34 +1,129 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.anisala</groupId>
-    <artifactId>chat-app</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-  </parent>
-  <artifactId>chat-server</artifactId>
-  <name>Chat Server</name>
-  <description>gRPC chat server</description>
-  <dependencies>
-  	<dependency>
-	  	<groupId>com.anisala</groupId>
-	  	<artifactId>chat-proto</artifactId>
-	  	<version>0.0.1-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-	  	<groupId>io.grpc</groupId>
-	    <artifactId>grpc-protobuf</artifactId>
-	    <version>1.84.0</version>
-	  </dependency>
-	  <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-netty-shaded</artifactId>
-        <version>1.84.0</version>
-    </dependency>
-    <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-stub</artifactId>
-        <version>1.84.0</version>
-    </dependency>
-  </dependencies>
-  
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.anisala</groupId>
+        <artifactId>chat-app</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>chat-server</artifactId>
+
+    <name>Chat Server</name>
+    <description>gRPC chat server</description>
+
+
+    <dependencies>
+
+        <!-- Your generated protobuf/gRPC classes -->
+        <dependency>
+            <groupId>com.anisala</groupId>
+            <artifactId>chat-proto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- gRPC protobuf support -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.84.0</version>
+        </dependency>
+
+        <!-- gRPC network transport -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.84.0</version>
+        </dependency>
+
+        <!-- gRPC Java stubs -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.84.0</version>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <plugins>
+
+            <!--
+                Creates an executable "fat JAR".
+
+                The resulting JAR contains:
+                1. Your server classes
+                2. gRPC dependencies
+                3. Other required dependencies
+
+                It also adds Main-Class to the manifest so that
+                "java -jar ..." knows which class to start.
+            -->
+            <plugin>
+
+                <groupId>org.apache.maven.plugins</groupId>
+
+                <artifactId>maven-shade-plugin</artifactId>
+
+                <version>3.6.0</version>
+
+                <executions>
+
+                    <execution>
+
+                        <!-- Run the shade plugin during "mvn package" -->
+                        <phase>package</phase>
+
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+
+                        <configuration>
+
+                            <!--
+                                Prevents Maven from creating another
+                                dependency-reduced POM.
+                            -->
+                            <createDependencyReducedPom>
+                                false
+                            </createDependencyReducedPom>
+
+                            <transformers>
+
+                                <!--
+                                    Adds the Main-Class entry to
+                                    META-INF/MANIFEST.MF.
+                                -->
+                                <transformer implementation=
+                                    "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+
+                                    <!--
+                                        CHANGE THIS if your actual
+                                        main class has a different
+                                        package/name.
+                                    -->
+                                    <mainClass>
+                                        com.anisala.chat.server.ChatServer
+                                    </mainClass>
+
+                                </transformer>
+
+                            </transformers>
+
+                        </configuration>
+
+                    </execution>
+
+                </executions>
+
+            </plugin>
+
+        </plugins>
+    </build>
+
 </project>
