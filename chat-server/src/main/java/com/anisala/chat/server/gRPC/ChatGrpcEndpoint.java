@@ -18,7 +18,7 @@ public class ChatGrpcEndpoint extends ChatServiceGrpc.ChatServiceImplBase {
 
     @Override
     public StreamObserver<ChatMessage> chatStream(StreamObserver<ChatMessage> responseObserver) {
-        GrpcConnection connection = new GrpcConnection(responseObserver);
+        ClientEndpointImpl endpoint = new ClientEndpointImpl(responseObserver);
         
         return new StreamObserver<ChatMessage>() {
             private String currentUserName;
@@ -27,8 +27,7 @@ public class ChatGrpcEndpoint extends ChatServiceGrpc.ChatServiceImplBase {
             public void onNext(ChatMessage protoMsg) {
                 if (currentUserName == null) {
                     currentUserName = protoMsg.getSender();
-                    // Assumes IP is extracted from gRPC Context in a real app
-                    chatService.registerUser(currentUserName, "127.0.0.1", connection);
+                    chatService.registerUser(currentUserName, endpoint);
                 }
 
                 Message domainMessage = new Message(

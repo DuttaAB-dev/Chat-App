@@ -2,13 +2,16 @@ package com.anisala.chat.server;
 
 import com.anisala.chat.server.gRPC.ChatGrpcEndpoint;
 import com.anisala.chat.server.service.ChatService;
-import com.anisala.chat.server.service.ConnectionManager;
 import com.anisala.chat.server.service.SessionManager;
 import com.anisala.chat.server.service.impl.ChatServiceImpl;
-import com.anisala.chat.server.service.impl.ConnectionManagerImpl;
 import com.anisala.chat.server.service.impl.SessionManagerImpl;
+import com.anisala.chat.server.repository.UserDao;
+import com.anisala.chat.server.repository.impl.UserDaoImpl;
+import com.anisala.chat.server.util.HibernateConfig;
+
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import org.hibernate.SessionFactory;
 
 import java.io.IOException;
 
@@ -18,21 +21,13 @@ public class ChatServer {
         
         System.out.println("Initializing Chat Server components...");
 
-        // 1. Initialize the State Manager (Data Tier)
         SessionManager sessionManager = new SessionManagerImpl();
-
-        // 2. Initialize the Transport Router
-        ConnectionManager connectionManager = new ConnectionManagerImpl();
-
-        // 3. Initialize the Core Business Logic (Service Tier)
-        // Notice how we inject the two managers into the core orchestrator
-        ChatService chatService = new ChatServiceImpl(sessionManager, connectionManager);
-
-        // 4. Initialize the gRPC Adapter (Presentation Tier)
-        // We inject the clean ChatService into the gRPC endpoint
+        ChatService chatService = new ChatServiceImpl(sessionManager);
         ChatGrpcEndpoint chatEndpoint = new ChatGrpcEndpoint(chatService);
 
-        // 5. Build and Start the gRPC Server
+        SessionFactory factory = HibernateConfig.getSessionFactory();
+        UserDao userDao = new UserDaoImpl(factory);
+        
         int port = 8080;
         Server server = ServerBuilder.forPort(port)
                 .addService(chatEndpoint)
@@ -41,16 +36,15 @@ public class ChatServer {
 
         System.out.println("Chat Server started successfully! Listening on port " + port);
 
-        // 6. Handle graceful shutdown (e.g., if you press Ctrl+C)
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Shutting down gRPC server gracefully...");
+            System.out.println("Shutting down gRPC server...");
             if (server != null) {
                 server.shutdown();
             }
+            HibernateConfig.shutdown();
             System.out.println("Server shut down.");
         }));
 
-        // 7. Block the main thread to keep the server running
         server.awaitTermination();
     }
 }

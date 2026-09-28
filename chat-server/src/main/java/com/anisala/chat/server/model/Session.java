@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public class Session {
 	private String userName;
 	// private StreamObserver<Message> chatStream;
-	private String ipAddress;
 	private LocalDateTime lastActive;
 	private LocalDateTime createdAt;
 	// private Consumer<Message> messageListener;
@@ -20,19 +19,14 @@ public class Session {
 	// 	this.chatStream = chatStream;
 	// }
 
-	public Session(String userName, LocalDateTime createdAt, LocalDateTime lastActive, String ipAddress) {
+	public Session(String userName, LocalDateTime createdAt, LocalDateTime lastActive) {
 		this.userName = userName;
-		this.ipAddress = ipAddress;
 		this.createdAt = createdAt;
 		this.lastActive = lastActive;
 		// this.messageListener = messageListener;
 	}
 	
 
-
-	public String getIpAddress() {
-		return ipAddress;
-	}
 
 	public String getUserName() {
 		return userName;
