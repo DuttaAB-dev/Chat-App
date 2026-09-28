@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- 1. MySQL Database Connection Settings -->
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <!-- Replace 'chat_db' with your actual database name -->
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/chatapp?useSSL=false&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">password</property>
+
+        <!-- 2. Hibernate Core Settings -->
+        <!-- Tells Hibernate to generate MySQL-specific SQL -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        
+        <!-- REQUIRED for getCurrentSession() to work properly without crashing -->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <!-- 3. Debugging (Optional but highly recommended for development) -->
+        <!-- Prints all generated SQL to the console -->
+        <property name="hibernate.show_sql">true</property>
+        <!-- Formats the printed SQL so it is readable -->
+        <property name="hibernate.format_sql">true</property>
+
+        <!-- 4. Schema Generation -->
+        <!-- 'update' creates the tables if they don't exist and updates columns if your Model changes -->
+        <!-- Change to 'validate' or 'none' in a real production environment -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- 5. Entity Mappings -->
+        <!-- You must list EVERY @Entity class here so Hibernate knows they exist -->
+        <mapping class="com.anisala.chat.server.model.User"/>
+        
+    </session-factory>
+</hibernate-configuration>
