@@ -1,11 +1,5 @@
 package com.anisala.chat.server.model;
 
-//message ChatMessage{
-//	string sender = 1;
-//	string receiver = 2;
-//	string message = 3;
-//}
-
 import java.time.Instant;
 
 public class Message {

@@ -1,29 +1,16 @@
 package com.anisala.chat.server.model;
 
 import java.time.LocalDateTime;
-// import java.util.function.Consumer;
-
-// import io.grpc.stub.StreamObserver;
 
 public class Session {
 	private String userId;
-	// private StreamObserver<Message> chatStream;
 	private LocalDateTime lastActive;
 	private LocalDateTime createdAt;
-	// private Consumer<Message> messageListener;
-	
-	// public StreamObserver<Message> getChatStream() {
-	// 	return chatStream;
-	// }
-	// public void setChatStream(StreamObserver<Message> chatStream) {
-	// 	this.chatStream = chatStream;
-	// }
 
 	public Session(String userId, LocalDateTime createdAt, LocalDateTime lastActive) {
 		this.userId = userId;
 		this.createdAt = createdAt;
 		this.lastActive = lastActive;
-		// this.messageListener = messageListener;
 	}
 	
 
@@ -43,14 +30,5 @@ public class Session {
 	public void updateActivity() {
 		this.lastActive = LocalDateTime.now();
 	}
-// 
-// 	public Consumer<Message> getMessageListener() {
-// 		return messageListener;
-// 	}
-// 	public void deliver(Message message) {
-// 	    if(messageListener != null) {
-// 	        messageListener.accept(message);
-// 	    }
-// 	}
 }
 
