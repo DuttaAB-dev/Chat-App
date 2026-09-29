@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 // import io.grpc.stub.StreamObserver;
 
 public class Session {
-	private String userName;
+	private String userId;
 	// private StreamObserver<Message> chatStream;
 	private LocalDateTime lastActive;
 	private LocalDateTime createdAt;
@@ -19,8 +19,8 @@ public class Session {
 	// 	this.chatStream = chatStream;
 	// }
 
-	public Session(String userName, LocalDateTime createdAt, LocalDateTime lastActive) {
-		this.userName = userName;
+	public Session(String userId, LocalDateTime createdAt, LocalDateTime lastActive) {
+		this.userId = userId;
 		this.createdAt = createdAt;
 		this.lastActive = lastActive;
 		// this.messageListener = messageListener;
@@ -28,8 +28,8 @@ public class Session {
 	
 
 
-	public String getUserName() {
-		return userName;
+	public String getUserId() {
+		return userId;
 	}
 
 	public LocalDateTime getLastActive() {

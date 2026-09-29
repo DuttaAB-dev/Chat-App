@@ -29,6 +29,12 @@
         <!-- gRPC protobuf support -->
         <dependency>
             <groupId>io.grpc</groupId>
+            <artifactId>grpc-services</artifactId>
+            <version>1.84.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
             <version>1.84.0</version>
         </dependency>

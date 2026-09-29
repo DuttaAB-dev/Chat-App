@@ -8,8 +8,8 @@
         <!-- 1. MySQL Database Connection Settings -->
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <!-- Replace 'chat_db' with your actual database name -->
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/chatapp?useSSL=false&amp;serverTimezone=UTC</property>
-        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/chat_app?useSSL=false&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.username">chatapp</property>
         <property name="hibernate.connection.password">password</property>
 
         <!-- 2. Hibernate Core Settings -->
