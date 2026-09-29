@@ -23,27 +23,29 @@ class ActiveSession {
         return session;
     }
     
-}
+}// created this to combine the session and endpoint into one object for easier storage
 
 public class SessionManagerImpl implements SessionManager {
     private final Map<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
     @Override
     public void createSession(Session session, ClientEndpoint endpoint) {
-        activeSessions.put(session.getUserName(), new ActiveSession(session, endpoint));
+        activeSessions.put(session.getUserId(), new ActiveSession(session, endpoint));
     }
     
     @Override
-    public void removeSession(String userName) {
-        activeSessions.remove(userName);
+    public void removeSession(String userId) {
+        activeSessions.remove(userId);
     }
     
     @Override
-    public Session getSession(String userName) {
-        return activeSessions.get(userName).getSession();
+    public Session getSession(String userId) {
+        ActiveSession activeSession = activeSessions.get(userId);// fixed nullpointer exception, triggered whern activeSessions.get(userId) gave null value
+        return activeSession != null ? activeSession.getSession() : null;
     }
     
     @Override
-    public ClientEndpoint getEndpoint(String userName) {
-        return activeSessions.get(userName).getEndpoint();
+    public ClientEndpoint getEndpoint(String userId) {
+        ActiveSession activeSession = activeSessions.get(userId);// same as getSession
+        return activeSession != null ? activeSession.getEndpoint() : null;
     }
 }
