@@ -1,13 +1,18 @@
 package com.anisala.chat.server;
 
 import com.anisala.chat.server.gRPC.ChatGrpcEndpoint;
+import com.anisala.chat.server.gRPC.UserGrpcService;
 import com.anisala.chat.server.service.ChatService;
+import com.anisala.chat.server.service.UserService;
 import com.anisala.chat.server.service.SessionManager;
 import com.anisala.chat.server.service.impl.ChatServiceImpl;
 import com.anisala.chat.server.service.impl.SessionManagerImpl;
+import com.anisala.chat.server.service.impl.UserServiceImpl;
 import com.anisala.chat.server.repository.UserDao;
 import com.anisala.chat.server.repository.impl.UserDaoImpl;
+
 import com.anisala.chat.server.util.HibernateConfig;
+import io.grpc.protobuf.services.ProtoReflectionService;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -28,9 +33,14 @@ public class ChatServer {
         SessionFactory factory = HibernateConfig.getSessionFactory();
         UserDao userDao = new UserDaoImpl(factory);
         
+        UserService userService = new UserServiceImpl(userDao, sessionManager);
+        UserGrpcService userGrpcService = new UserGrpcService(userService);
+        
         int port = 8080;
         Server server = ServerBuilder.forPort(port)
                 .addService(chatEndpoint)
+                .addService(userGrpcService)
+                .addService(ProtoReflectionService.newInstance())
                 .build()
                 .start();
 

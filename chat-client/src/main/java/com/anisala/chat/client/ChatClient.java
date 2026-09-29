@@ -12,7 +12,7 @@ public class ChatClient {
     public static void main(String[] args) {
 
         ManagedChannel channel =ManagedChannelBuilder
-                        		.forAddress("localhost", 50051)
+                        		.forAddress("localhost", 8080)
                         		.usePlaintext()
                         		.build();
 

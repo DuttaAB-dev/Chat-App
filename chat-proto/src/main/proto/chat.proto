@@ -12,15 +12,9 @@ service ChatService {
 	// legacy method. might remove later
     rpc SendMessage(SendMessageRequest)
         returns (SendMessageResponse);
-        
-    rpc GetUser(GetUserRequest)
-    	returns (User);
     
     rpc ChatStream(stream ChatMessage)
     	returns (stream ChatMessage);
-    
-    rpc LogIn(LogInRequest)
-    	returns (LogInResponse);
     
     // rpc MetaData(MetaDataRequest)
     	// returns (MetaDataResponse);
@@ -31,6 +25,20 @@ service ChatService {
     rpc DownloadFile(DownloadRequest)
     	returns (stream FileChunk);
     	
+}
+
+service UserService {
+    rpc GetUser(GetUserRequest)
+    	returns (UserObj);
+
+    rpc LogIn(LogInRequest)
+    	returns (LogInResponse);
+
+    rpc LogOut(LogOutRequest)
+    	returns (LogOutResponse);
+
+    rpc CreateUser(UserObj)
+    	returns (CreateUserResponse);
 }
 
 message SendMessageRequest {
@@ -45,7 +53,7 @@ message SendMessageResponse {
     string message = 2;
 }
 
-message User{
+message UserObj{
 	string user_id = 1;
 	string name = 2;
 	string user_name = 3;
@@ -67,10 +75,21 @@ message LogInRequest{
 }
 
 message LogInResponse{
+	UserObj user = 1;
+	string message = 2;
+}
+
+message LogOutRequest{
+	string user_id = 1;
+}
+
+message LogOutResponse{
+	string message = 2;
+}
+
+message CreateUserResponse{
 	bool success = 1;
-	string user_name = 2;
-	string name = 3;
-	string message = 4;
+	string message = 2;
 }
 
 message FileChunk{
