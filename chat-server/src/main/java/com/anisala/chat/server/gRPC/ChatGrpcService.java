@@ -8,11 +8,11 @@ import com.anisala.chat.server.util.TimestampConverter;
 
 import io.grpc.stub.StreamObserver;
 
-public class ChatGrpcEndpoint extends ChatServiceGrpc.ChatServiceImplBase {
+public class ChatGrpcService extends ChatServiceGrpc.ChatServiceImplBase {
     
     private final ChatService chatService;
 
-    public ChatGrpcEndpoint(ChatService chatService) {
+    public ChatGrpcService(ChatService chatService) {
         this.chatService = chatService;
     }
 

@@ -1,6 +1,6 @@
 package com.anisala.chat.server;
 
-import com.anisala.chat.server.gRPC.ChatGrpcEndpoint;
+import com.anisala.chat.server.gRPC.ChatGrpcService;
 import com.anisala.chat.server.gRPC.UserGrpcService;
 import com.anisala.chat.server.service.ChatService;
 import com.anisala.chat.server.service.UserService;
@@ -18,9 +18,15 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import org.hibernate.SessionFactory;
 
+import java.net.Socket;
+import java.net.ServerSocket;
+
 import java.io.IOException;
 
 public class ChatServer {
+
+    private static int GRPC_PORT = 8080;
+    private static int TCP_PORT = 8081;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         
@@ -28,7 +34,7 @@ public class ChatServer {
 
         SessionManager sessionManager = new SessionManagerImpl();
         ChatService chatService = new ChatServiceImpl(sessionManager);
-        ChatGrpcEndpoint chatEndpoint = new ChatGrpcEndpoint(chatService);
+        ChatGrpcService chatGrpcService = new ChatGrpcService(chatService);
 
         SessionFactory factory = HibernateConfig.getSessionFactory();
         UserDao userDao = new UserDaoImpl(factory);
@@ -36,26 +42,27 @@ public class ChatServer {
         UserService userService = new UserServiceImpl(userDao, sessionManager);
         UserGrpcService userGrpcService = new UserGrpcService(userService);
         
-        int port = 8080;
-        Server server = ServerBuilder.forPort(port)
-                .addService(chatEndpoint)
+        // int port = 8080;
+        Server grpcServer = ServerBuilder.forPort(GRPC_PORT)
+                .addService(chatGrpcService)
                 .addService(userGrpcService)
                 .addService(ProtoReflectionService.newInstance())
                 .build()
                 .start();
 
-        System.out.println("Chat Server started successfully! Listening on port " + port);
+        // ServerSocket tcpServer = new ServerSocket(TCP_PORT);
+        System.out.println("Chat Server started successfully!\ngRPC server listening on port " + GRPC_PORT + "\nTCP server listening on port " + TCP_PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down gRPC server...");
-            if (server != null) {
-                server.shutdown();
+            if (grpcServer != null) {
+                grpcServer.shutdown();
             }
             HibernateConfig.shutdown();
             System.out.println("Server shut down.");
         }));
 
-        server.awaitTermination();
+        grpcServer.awaitTermination();
     }
 }
 // import io.grpc.Server;
