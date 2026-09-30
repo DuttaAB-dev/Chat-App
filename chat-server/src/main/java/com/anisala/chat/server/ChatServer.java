@@ -71,7 +71,7 @@ public class ChatServer {
                 while (!Thread.currentThread().isInterrupted())
                     try{
                         Socket socket = tcpServer.accept();
-                        clientThreadPool.submit(new TcpClientHandler(socket));
+                        clientThreadPool.submit(new TcpClientHandler(socket, chatTcpService, userTcpService));
                     } catch (SocketException e) {
                         System.out.println("TCP server closed.");
                         break;
