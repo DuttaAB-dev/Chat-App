@@ -2,24 +2,35 @@ package com.anisala.chat.server;
 
 import com.anisala.chat.server.gRPC.ChatGrpcService;
 import com.anisala.chat.server.gRPC.UserGrpcService;
+
+import com.anisala.chat.server.tcp.ChatTcpService;
+import com.anisala.chat.server.tcp.UserTcpService;
+
 import com.anisala.chat.server.service.ChatService;
 import com.anisala.chat.server.service.UserService;
 import com.anisala.chat.server.service.SessionManager;
 import com.anisala.chat.server.service.impl.ChatServiceImpl;
 import com.anisala.chat.server.service.impl.SessionManagerImpl;
 import com.anisala.chat.server.service.impl.UserServiceImpl;
+
 import com.anisala.chat.server.repository.UserDao;
 import com.anisala.chat.server.repository.impl.UserDaoImpl;
 
 import com.anisala.chat.server.util.HibernateConfig;
+
 import io.grpc.protobuf.services.ProtoReflectionService;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+
 import org.hibernate.SessionFactory;
 
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.ServerSocket;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import java.io.IOException;
 
@@ -35,14 +46,15 @@ public class ChatServer {
         SessionManager sessionManager = new SessionManagerImpl();
         ChatService chatService = new ChatServiceImpl(sessionManager);
         ChatGrpcService chatGrpcService = new ChatGrpcService(chatService);
+        ChatTcpService chatTcpService = new ChatTcpService(chatService);
 
         SessionFactory factory = HibernateConfig.getSessionFactory();
         UserDao userDao = new UserDaoImpl(factory);
         
         UserService userService = new UserServiceImpl(userDao, sessionManager);
         UserGrpcService userGrpcService = new UserGrpcService(userService);
-        
-        // int port = 8080;
+        UserTcpService userTcpService = new UserTcpService(userService);
+
         Server grpcServer = ServerBuilder.forPort(GRPC_PORT)
                 .addService(chatGrpcService)
                 .addService(userGrpcService)
@@ -50,14 +62,47 @@ public class ChatServer {
                 .build()
                 .start();
 
-        // ServerSocket tcpServer = new ServerSocket(TCP_PORT);
+        ExecutorService clientThreadPool = Executors.newCachedThreadPool();
+        ServerSocket tcpServer = new ServerSocket(TCP_PORT);
+        
+        Thread tcpThread = new Thread(() -> {
+            // volatile boolean running = true;
+            try {
+                while (!Thread.currentThread().isInterrupted())
+                    try{
+                        Socket socket = tcpServer.accept();
+                        clientThreadPool.submit(new TcpClientHandler(socket));
+                    } catch (SocketException e) {
+                        System.out.println("TCP server closed.");
+                        break;
+                    }
+                    
+            } catch (IOException e) {
+                System.err.println("TCP server error: ");
+                e.printStackTrace();
+            }
+        });
+        tcpThread.start();
+
         System.out.println("Chat Server started successfully!\ngRPC server listening on port " + GRPC_PORT + "\nTCP server listening on port " + TCP_PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down gRPC server...");
-            if (grpcServer != null) {
+            if (grpcServer != null) 
                 grpcServer.shutdown();
+
+            System.out.println("Shutting down TCP server...");
+            try {
+                if (tcpServer != null && !tcpServer.isClosed()) 
+                    tcpServer.close(); 
+                
+            } catch (IOException e) {
+                System.err.println("Error closing TCP server: " + e.getMessage());
             }
+
+            if (clientThreadPool != null)
+                clientThreadPool.shutdownNow();
+                
             HibernateConfig.shutdown();
             System.out.println("Server shut down.");
         }));
