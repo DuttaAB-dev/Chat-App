@@ -5,6 +5,7 @@ import com.anisala.chat.server.gRPC.UserGrpcService;
 
 import com.anisala.chat.server.tcp.ChatTcpService;
 import com.anisala.chat.server.tcp.UserTcpService;
+import com.anisala.chat.server.tcp.TcpClientHandler;
 
 import com.anisala.chat.server.service.ChatService;
 import com.anisala.chat.server.service.UserService;
@@ -17,7 +18,6 @@ import com.anisala.chat.server.repository.UserDao;
 import com.anisala.chat.server.repository.impl.UserDaoImpl;
 
 import com.anisala.chat.server.util.HibernateConfig;
-
 import io.grpc.protobuf.services.ProtoReflectionService;
 
 import io.grpc.Server;
@@ -66,6 +66,7 @@ public class ChatServer {
         ServerSocket tcpServer = new ServerSocket(TCP_PORT);
         
         Thread tcpThread = new Thread(() -> {
+            //Separate thread for handling incoming TCP connections
             // volatile boolean running = true;
             try {
                 while (!Thread.currentThread().isInterrupted())

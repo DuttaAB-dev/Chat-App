@@ -26,6 +26,7 @@ class ActiveSession {
 }// created this to combine the session and endpoint into one object for easier storage
 
 public class SessionManagerImpl implements SessionManager {
+    // was simple HashMap before. converted it to ConcurrentHashMap for thread safety especially for TCP connections
     private final Map<String, ActiveSession> activeSessions = new ConcurrentHashMap<>();
     @Override
     public void createSession(Session session, ClientEndpoint endpoint) {
