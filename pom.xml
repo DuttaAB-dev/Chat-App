@@ -10,5 +10,6 @@
   	<module>chat-proto</module>
   	<module>chat-server</module>
   	<module>chat-client</module>
+  	<module>chat-tcp</module>
   </modules>
 </project>

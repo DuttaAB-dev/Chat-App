@@ -9,6 +9,11 @@
   <name>Chat Client</name>
   <description>gRPC chat client</description>
   <dependencies>
+    <dependency>
+        <groupId>com.anisala</groupId>
+        <artifactId>chat-tcp</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
 
     <dependency>
         <groupId>com.anisala</groupId>
