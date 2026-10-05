@@ -11,6 +11,8 @@ import com.anisala.chat.tcp.Deserialiser;
 import com.anisala.chat.tcp.dto.*;
 
 import com.anisala.chat.server.service.ClientEndpoint;
+import com.anisala.chat.server.exception.UserOfflineException;
+
 
 public class TcpClientHandler implements Runnable {
     private final Socket socket;
@@ -61,8 +63,16 @@ public class TcpClientHandler implements Runnable {
                         // GetUserRequest getUserRequest = Deserialiser.deserialize(payload, GetUserRequest.class);
                         // userTcpService.getUser(getUserRequest)
                         ChatMessage incomingMessage = Deserialiser.deserialize(payload, ChatMessage.class);
-                        chatTcpService.processIncomingMessage(incomingMessage);
-                        
+                        try {
+                            chatTcpService.processIncomingMessage(incomingMessage); // Which calls chatService.sendMessage()
+                        } catch (UserOfflineException e) {
+                            System.out.println("Message failed: " + e.getMessage());
+                            MessageHandler.writeMessage(
+                                dataOutputStream,
+                                MessageType.ERROR,
+                                e.getMessage().getBytes()
+                            );
+                        }
                         break;
                     // case MessageType.SEND_MESSAGE:
                     //     SendMessageRequest sendMessageRequest = Deserialiser.deserialize(payload, SendMessageRequest.class);

@@ -5,6 +5,7 @@ import com.anisala.chat.server.model.Session;
 import com.anisala.chat.server.service.ChatService;
 import com.anisala.chat.server.service.ClientEndpoint;
 import com.anisala.chat.server.service.SessionManager;
+import com.anisala.chat.server.exception.UserOfflineException;
 
 import java.time.LocalDateTime;
 
@@ -37,7 +38,7 @@ public class ChatServiceImpl implements ChatService {
         Session receiverSession = sessionManager.getSession(receiverName);
         if (receiverSession == null) {
             System.out.println("Message failed: User " + receiverName + " is offline.");
-            return;
+            throw new UserOfflineException("User " + receiverName + " is offline.");
         }
 
         else {
