@@ -39,9 +39,10 @@ public class UserDaoImpl implements UserDao {
         try{
             Session session = sessionFactory.getCurrentSession();
             transaction = session.beginTransaction();
-            Query<User> query = session.createQuery("FROM User WHERE userName = :userName", User.class);
-            query.setParameter("userName", userName);
-            user = query.uniqueResult();
+            // Query<User> query = session.createQuery("FROM User WHERE userName = :userName", User.class);
+            // query.setParameter("userName", userName);
+            // user = query.uniqueResult();
+            user = session.byNaturalId(User.class).using("userName",userName).load();
             transaction.commit();
 
         } 
@@ -58,13 +59,74 @@ public class UserDaoImpl implements UserDao {
         try{
             Session session = sessionFactory.getCurrentSession();
             transaction = session.beginTransaction();
-            Query<User> query = session.createQuery("FROM User WHERE userId = :userId", User.class);
-            query.setParameter("userId", userId);
-            user = query.uniqueResult();
+            // Query<User> query = session.createQuery("FROM User WHERE userId = :userId", User.class);
+            // query.setParameter("userId", userId);
+            // user = query.uniqueResult();
+            user = session.get(User.class, userId);
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return user;
     }
+
+    @Override
+    public User update(User user) {
+        Transaction transaction = null;
+        try{
+            Session session = sessionFactory.getCurrentSession();
+            transaction = session.beginTransaction();
+            user = session.merge(user);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) 
+                transaction.rollback();
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    // @Override
+    // public void setOnline(String userId, boolean isOnline) {
+    //     Transaction transaction = null;
+    //     try{
+    //         Session session = sessionFactory.getCurrentSession();
+    //         transaction = session.beginTransaction();
+    //         // Query<User> query = session.createQuery("FROM User WHERE userId = :userId", User.class);
+    //         // query.setParameter("userId", userId);
+    //         // User user = query.uniqueResult();
+    //         Us
+    //         if (user != null) {
+    //             user.setIsOnline(isOnline);
+    //             session.update(user);
+    //         }
+    //         transaction.commit();
+    //     } catch (Exception e) {
+    //         if (transaction != null) 
+    //             transaction.rollback();
+    //         e.printStackTrace();
+    //     }
+    // }
+
+    // @Override
+    // public boolean isOnline(String userName) {
+    //     Transaction transaction = null;
+    //     try{
+    //         Session session = sessionFactory.getCurrentSession();
+    //         transaction = session.beginTransaction();
+    //         Query<User> query = session.createQuery("FROM User WHERE userId = :userId", User.class);
+    //         query.setParameter("userId", userId);
+    //         User user = query.uniqueResult();
+    //         if (user != null) {
+    //             user.setIsOnline(true);
+    //             session.update(user);
+    //         }
+    //         transaction.commit();
+    //     } catch (Exception e) {
+    //         if (transaction != null) 
+    //             transaction.rollback();
+    //         e.printStackTrace();
+    //         return false;
+    //     }
+    // }
 }

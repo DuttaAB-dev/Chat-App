@@ -2,8 +2,7 @@ package com.anisala.chat.client.service;
 
 public interface ChatService {
     // void connect();
-    void sendMessage(String recipient, String message);
-    void startMessageListener(String username, java.util.function.BiConsumer<String, String> listener);
+    void sendMessage(String recipientId, String message);
+    void startMessageListener(String userId, java.util.function.BiConsumer<String, String> listener);
     void stopMessageListener();
-    boolean isOnline(String targetUser);
 }

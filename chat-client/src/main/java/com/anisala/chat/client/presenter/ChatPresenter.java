@@ -13,6 +13,8 @@ public class ChatPresenter {
     // State moves here, away from the UI
     private User currentUser;
     private String activeRecipient;
+    private String activeRecipientId;
+    private java.util.Map<String, String> idToNameMap = new java.util.HashMap<>();
     private String pendingFileSender;
     // ... other state variables ...
     private boolean isChatting;
@@ -33,7 +35,7 @@ public class ChatPresenter {
     private void chatLoop() {
         view.showSystemMessage("\n--- Chat Started ---");
         view.showSystemMessage("Commands: /chat <user>, /sendfile <path>, /accept, /reject, /logout, /quit\n");
-        chatService.startMessageListener(currentUser.getUserName(), this::handleIncomingMessage);
+        chatService.startMessageListener(currentUser.getUserId(), this::handleIncomingMessage);
         isChatting = true;
         
         while (isChatting) {
@@ -47,7 +49,7 @@ public class ChatPresenter {
                 if (activeRecipient == null)
                     view.showSystemMessage("You aren't chatting with anyone. Use '/chat <username>' first.");
                 else
-                    chatService.sendMessage(activeRecipient, input);
+                    chatService.sendMessage(activeRecipientId, input);
         }
         
     }
@@ -95,7 +97,10 @@ public class ChatPresenter {
                     String targetUser = parts[1];
                     view.showSystemMessage("Checking if " + targetUser + " is online...");
                     
-                    if (chatService.isOnline(targetUser)) {
+                    User userObj = userService.getUser(targetUser);
+                    if (userObj != null && userService.isOnline(targetUser)) {
+                        activeRecipientId = userObj.getUserId();
+                        idToNameMap.put(activeRecipientId, targetUser);
                         activeRecipient = targetUser;
                         view.showSystemMessage("You are now chatting with " + activeRecipient);
                     } else {
@@ -164,74 +169,27 @@ public class ChatPresenter {
         }
     }
 
-    private void handleIncomingMessage(String sender, String message) {
+    private void handleIncomingMessage(String senderId, String message) {
         if (message.equals("[PING]")) {
             return;
         }
-
-        if (sender.equals("System") && message.startsWith("[ERROR]")) {
+        if (senderId.equals("System") && message.startsWith("[ERROR]")) {
             view.showSystemMessage(message);
-            // If the user we were trying to chat with is offline, maybe clear activeRecipient
             return;
         }
 
-        // --- INTERCEPT CONTROL MESSAGES ---
-        if (message.startsWith("[FILE_REQ] ")) {
-            // String fileName = message.substring(11);
-            // pendingFileSender = sender;
-            // pendingFileName = fileName;
-            // view.showFileRequest(sender, fileName);
+        String displaySender = idToNameMap.get(senderId);
+        if (displaySender == null && !senderId.equals("System")) {
+            new Thread(() -> {
+                User senderUser = userService.getUserById(senderId);
+                String name = senderUser != null ? senderUser.getUserName() : senderId;
+                idToNameMap.put(senderId, name);
+                view.showIncomingMessage(name, message);
+            }).start();
             return;
+        } else if (senderId.equals("System")) {
+            displaySender = "System";
         }
-
-        else if (message.equals("[FILE_ACCEPT]")) {
-            // if (sender.equals(pendingUploadReceiver) && pendingUploadPath != null) {
-            //     view.showSystemMessage(sender + " accepted! Uploading to server...");
-            //     
-            //     new Thread(() -> {
-            //         String transferId = chatService.uploadFile(pendingUploadPath);
-            //         if (transferId != null) {
-            //             chatService.sendMessage(sender, "[FILE_READY] " + transferId);
-            //             view.showSystemMessage("Upload complete! Sent to " + sender);
-            //         } else {
-            //             view.showSystemMessage("Upload failed.");
-            //         }
-            //         pendingUploadPath = null;
-            //         pendingUploadReceiver = null;
-            //     }).start();
-            // }
-            return;
-        }
-
-        else if (message.equals("[FILE_REJECT]")) {
-            // if (sender.equals(pendingUploadReceiver)) {
-            //     view.showSystemMessage(sender + " rejected your file transfer.");
-            //     pendingUploadPath = null;
-            //     pendingUploadReceiver = null;
-            // }
-            return;
-        }
-
-        else if (message.startsWith("[FILE_READY] ")) {
-            // if (sender.equals(pendingFileSender)) {
-            //     String transferId = message.substring(13);
-            //     view.showSystemMessage("File is ready! Downloading from server...");
-            //     
-            //     new Thread(() -> {
-            //         boolean success = chatService.downloadFile(transferId, pendingFileName);
-            //         if (success) {
-            //             view.showFileTransferComplete(pendingFileName);
-            //         } else {
-            //             view.showSystemMessage("Failed to download file.");
-            //         }
-            //         pendingFileSender = null;
-            //         pendingFileName = null;
-            //     }).start();
-            // }
-            return;
-        }
-
-        // --- STANDARD TEXT MESSAGES ---
-        view.showIncomingMessage(sender, message);
-       }
+        view.showIncomingMessage(displaySender, message);
+    }
 }

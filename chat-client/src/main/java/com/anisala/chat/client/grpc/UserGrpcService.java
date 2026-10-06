@@ -77,4 +77,28 @@ public class UserGrpcService implements UserService {
     public String getCurrentUserName() {
         return currentUserName;
     }
+
+    @Override
+    public User getUserById(String userId) {
+        try {
+            com.anisala.chat.proto.UserObj obj = userStub.getUserById(
+                com.anisala.chat.proto.GetUserByIdRequest.newBuilder().setUserId(userId).build()
+            );
+            return new User(obj.getUserId(), obj.getUserName(), obj.getName());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean isOnline(String userName) {
+        try {
+            com.anisala.chat.proto.CheckOnlineResponse response = userStub.checkOnline(
+                com.anisala.chat.proto.CheckOnlineRequest.newBuilder().setUserName(userName).build()
+            );
+            return response.getIsOnline();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

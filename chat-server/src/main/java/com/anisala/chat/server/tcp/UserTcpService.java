@@ -5,9 +5,7 @@ import com.anisala.chat.tcp.dto.LogInResponse;
 import com.anisala.chat.tcp.dto.LogOutRequest;
 import com.anisala.chat.tcp.dto.LogOutResponse;
 import com.anisala.chat.tcp.dto.CreateUserResponse;
-// import com.anisala.chat.tcp.dto.CreateUserRequest;
 import com.anisala.chat.tcp.dto.UserObj;
-
 
 import com.anisala.chat.server.dto.UserDto;
 import com.anisala.chat.server.service.UserService;
@@ -20,6 +18,18 @@ public class UserTcpService {
         this.userService = userService;
     }
     
+    public UserDto getUserById(String userId) {
+        return userService.getUserById(userId);
+    }
+    
+    public boolean isOnline(String userName) {
+        return userService.isOnline(userName);
+    }
+    
+    public UserDto getUser(String userName) {
+        return userService.loginUser(userName); // Using loginUser as standard fetch for now
+    }
+
     public LogInResponse logIn(LogInRequest request) {
         String userName = request.getUserName();
         UserDto user = userService.loginUser(userName);
@@ -30,8 +40,8 @@ public class UserTcpService {
       
 		UserObj userObj = new UserObj(
 			user.getUserId(),
-			user.getName(),
-			user.getUserName()
+			user.getUserName(),
+			user.getName()
 		);
 			
 		LogInResponse response = new LogInResponse(
@@ -72,5 +82,4 @@ public class UserTcpService {
 		);
 		return response;
 	}
-    
 }

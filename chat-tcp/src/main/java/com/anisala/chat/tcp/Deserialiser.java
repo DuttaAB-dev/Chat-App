@@ -1,7 +1,7 @@
 package com.anisala.chat.tcp;
 // Made mostly with the help of AI
 import java.lang.reflect.Constructor;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.Instant;
 import java.nio.charset.*;
 import java.util.Base64;
@@ -19,8 +19,15 @@ public class Deserialiser {
                 throw new RuntimeException("No public constructor found for " + clazz.getSimpleName());
             }
             
+            
             Constructor<?> targetConstructor = constructors[0];
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount() > targetConstructor.getParameterCount()) {
+                    targetConstructor = constructor;
+                }
+            }
             int expectedParamCount = targetConstructor.getParameterCount();
+
 
             String[] parts = payloadStr.split("\\|", expectedParamCount);
 
@@ -53,7 +60,7 @@ public class Deserialiser {
 
     /**
      * Helper method to convert Strings into the exact type your class constructors need.
-     * I noticed your DTOs use String, boolean, and LocalDateTime. 
+     * I noticed your DTOs use String, boolean, and Instant. 
      */
     private static Object parseValue(String value, Class<?> type) {
 
@@ -69,7 +76,7 @@ public class Deserialiser {
 
         if (type == boolean.class || type == Boolean.class) return Boolean.parseBoolean(value);
 
-        if (type == LocalDateTime.class) return LocalDateTime.parse(value); // Needs ISO-8601 string, e.g. "2023-10-01T15:30"
+        if (type == Instant.class) return Instant.parse(value); // Needs ISO-8601 string, e.g. "2023-10-01T15:30"
 
         if (type == Instant.class) return Instant.parse(value);
 

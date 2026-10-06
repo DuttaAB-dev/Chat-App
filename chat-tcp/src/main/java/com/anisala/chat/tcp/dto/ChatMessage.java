@@ -1,40 +1,40 @@
 package com.anisala.chat.tcp.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class ChatMessage implements DtoMarker {
-    private String sender;
-    private String receiver;
+    private String senderId;
+    private String receiverId;
     private String message;
-    private LocalDateTime timestamp;
+    private Instant timestamp;
 
-    public ChatMessage(String sender, String receiver, String message, LocalDateTime timestamp) {
-        this.sender = sender;
-        this.receiver = receiver;
+    public ChatMessage(String senderId, String receiverId, String message, Instant timestamp) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
         this.message = message;
         this.timestamp = timestamp;
     }
     
-    public String getSender() {
-        return sender;
+    public String getSenderId() {
+        return senderId;
     }
 
-    public String getReceiver() {
-        return receiver;
+    public String getReceiverId() {
+        return receiverId;
     }
     
     public String getMessage() {
         return message ;
     }
     
-    public LocalDateTime getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
     public String toString() {
         return "ChatMessage{" +
-                "sender='" + sender + '\'' +
-                ", receiver='" + receiver + '\'' +
+                "senderId='" + senderId + '\'' +
+                ", receiverId='" + receiverId + '\'' +
                 ", message='" + message + '\'' +
                 ", timestamp=" + timestamp +
                 '}';

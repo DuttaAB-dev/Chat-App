@@ -47,18 +47,18 @@ public class ChatTcpService {
      */
     public void processIncomingMessage(ChatMessage networkMessage) {
         
-        if (networkMessage.getSender() == null || networkMessage.getReceiver() == null) {
+        if (networkMessage.getSenderId() == null || networkMessage.getReceiverId() == null) {
             System.err.println("Dropped invalid message: Missing sender or receiver");
             return; 
         }
 
         Instant messageTimestamp = (networkMessage.getTimestamp() != null)
-                ? networkMessage.getTimestamp().toInstant(ZoneOffset.UTC)
+                ? networkMessage.getTimestamp()
                 : Instant.now();
 
         Message domainMessage = new Message(
-            networkMessage.getSender(),
-            networkMessage.getReceiver(),
+            networkMessage.getSenderId(),
+            networkMessage.getReceiverId(),
             networkMessage.getMessage(),
             messageTimestamp
         );

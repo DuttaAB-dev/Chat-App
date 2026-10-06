@@ -17,11 +17,11 @@ public class ChatServiceImpl
         );
 
         System.out.println(
-                "From: " + request.getSender()
+                "From: " + request.getSenderId()
         );
 
         System.out.println(
-                "To: " + request.getReceiver()
+                "To: " + request.getReceiverId()
         );
 
         System.out.println(

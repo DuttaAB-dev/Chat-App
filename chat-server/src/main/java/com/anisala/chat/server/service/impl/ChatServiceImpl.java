@@ -5,30 +5,35 @@ import com.anisala.chat.server.model.Session;
 import com.anisala.chat.server.service.ChatService;
 import com.anisala.chat.server.service.ClientEndpoint;
 import com.anisala.chat.server.service.SessionManager;
+import com.anisala.chat.server.service.UserService;
 import com.anisala.chat.server.exception.UserOfflineException;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class ChatServiceImpl implements ChatService {
 
     private final SessionManager sessionManager;
+    private final UserService userService;
 
-    public ChatServiceImpl(SessionManager sessionManager) {
+    public ChatServiceImpl(SessionManager sessionManager, UserService userService) {
         this.sessionManager = sessionManager;
+        this.userService = userService;
     }
 
     @Override
-    public void registerUser(String userName, ClientEndpoint endpoint) {
-        Session newSession = new Session(userName, LocalDateTime.now(), LocalDateTime.now());
+    public void registerUser(String userId, ClientEndpoint endpoint) {
+        Session newSession = new Session(userId, Instant.now(), Instant.now());
         sessionManager.createSession(newSession, endpoint);
-
-        System.out.println("User registered: " + userName);
+        userService.setOnline(userId, true);
+        System.out.println("User registered: " + userId);
     }
 
     @Override
-    public void removeUser(String userName) {
-        sessionManager.removeSession(userName);
-        System.out.println("User disconnected: " + userName);
+    public void removeUser(String userId) {
+        sessionManager.removeSession(userId);
+        userService.setOnline(userId, false);
+        userService.setLastSeen(userId, Instant.now());
+        System.out.println("User disconnected: " + userId);
     }
 
     @Override

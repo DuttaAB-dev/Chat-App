@@ -6,10 +6,11 @@ import com.anisala.chat.tcp.dto.ChatMessage;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.function.BiConsumer;
 
 public class ChatTcpService implements ChatService {
+    public static volatile Message lastNonChatMessage = null;
 
     private final DataOutputStream out;
     private final DataInputStream in;
@@ -23,8 +24,8 @@ public class ChatTcpService implements ChatService {
     }
 
     @Override
-    public void startMessageListener(String username, BiConsumer<String, String> listener) {
-        this.currentUsername = username;
+    public void startMessageListener(String userId, BiConsumer<String, String> listener) {
+        this.currentUsername = userId;
         this.isListening = true;
 
         new Thread(() -> {
@@ -34,12 +35,15 @@ public class ChatTcpService implements ChatService {
 
                     if (msg.getMessageType() == MessageType.MESSAGE) {
                         ChatMessage chat = Deserialiser.deserialize(msg.getPayload(), ChatMessage.class);
-                        listener.accept(chat.getSender(), chat.getMessage());
+                        listener.accept(chat.getSenderId(), chat.getMessage());
                     }
                     else if (msg.getMessageType() == MessageType.ERROR) {
                         lastMessageFailed = true;
                         String error = new String(msg.getPayload());
                         listener.accept("System", "[ERROR] " + error);
+                    }
+                    else {
+                        lastNonChatMessage = msg;
                     }
                 }
             } catch (Exception e) {
@@ -47,7 +51,7 @@ public class ChatTcpService implements ChatService {
                     listener.accept("System", "[ERROR] Connection lost.");
                 }
             }
-        }, "tcp-listener-" + username).start();
+        }, "tcp-listener-" + userId).start();
     }
 
     @Override
@@ -57,12 +61,12 @@ public class ChatTcpService implements ChatService {
     }
 
     @Override
-    public void sendMessage(String recipient, String message) {
+    public void sendMessage(String recipientId, String message) {
         if (currentUsername == null) return;
         lastMessageFailed = false; // Reset before sending
         
         try {
-            ChatMessage chatMsg = new ChatMessage(currentUsername, recipient, message, LocalDateTime.now());
+            ChatMessage chatMsg = new ChatMessage(currentUsername, recipientId, message, Instant.now());
             byte[] payload = Serialiser.serialize(chatMsg);
             MessageHandler.writeMessage(out, MessageType.MESSAGE, payload);
         } catch (Exception e) {
@@ -70,7 +74,6 @@ public class ChatTcpService implements ChatService {
         }
     }
 
-    @Override
     public boolean isOnline(String targetUser) {
         sendMessage(targetUser, "[PING]");
         

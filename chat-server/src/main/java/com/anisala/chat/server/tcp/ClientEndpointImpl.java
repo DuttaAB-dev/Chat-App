@@ -2,7 +2,7 @@ package com.anisala.chat.server.tcp;
 
 import java.io.DataOutputStream;
 import java.net.Socket;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneOffset;
 
 import com.anisala.chat.tcp.dto.ChatMessage;
@@ -28,7 +28,7 @@ public class ClientEndpointImpl implements ClientEndpoint {
                 domainMsg.getSenderUname(),
                 domainMsg.getReceiverUname(),
                 domainMsg.getMessage(),
-                LocalDateTime.ofInstant(domainMsg.getTimestamp(), ZoneOffset.UTC)
+                domainMsg.getTimestamp()
             );
 
             byte[] payload = Serialiser.serialize(dto);

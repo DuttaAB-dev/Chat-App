@@ -18,5 +18,14 @@ public final class MessageType {
 
     public static final byte ERROR = 11;
 
+    public static final byte CHECK_ONLINE = 12;
+    public static final byte CHECK_ONLINE_RESPONSE = 13;
+
+    public static final byte GET_USER_BY_ID = 14;
+    public static final byte GET_USER_BY_ID_RESPONSE = 15;
+
+    public static final byte CREATE_USER = 16;
+    public static final byte CREATE_USER_RESPONSE = 17;
+
     private MessageType() {}
 }

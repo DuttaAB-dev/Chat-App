@@ -1,6 +1,9 @@
 package com.anisala.chat.server.model;
 
+import org.hibernate.annotations.NaturalId;
 import jakarta.persistence.*;
+import java.time.Instant;
+
 
 @Entity
 @Table(name = "users")
@@ -8,12 +11,13 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private String userId;
-	
+
+	@NaturalId
 	@Column(unique = true)
 	private String userName;
 	private String name;
 	private Boolean isOnline;
-	private String lastSeen;
+	private Instant lastSeen;
 
 	public User(){}
 	
@@ -50,11 +54,11 @@ public class User {
 		this.isOnline = isOnline;
 	}
 
-	public String getLastSeen() {
+	public Instant getLastSeen() {
 		return lastSeen;
 	}
 
-	public void setLastSeen(String lastSeen) {
+	public void setLastSeen(Instant lastSeen) {
 		this.lastSeen = lastSeen;
 	}
 
@@ -65,7 +69,7 @@ public class User {
 				", userName='" + userName + '\'' +
 				", name='" + name + '\'' +
 				", isOnline=" + isOnline +
-				", lastSeen='" + lastSeen + '\'' +
+				", lastSeen=" + lastSeen +
 				'}';
 	}
 }

@@ -7,6 +7,8 @@ import com.anisala.chat.server.dto.UserDto;
 import com.anisala.chat.server.service.SessionManager;
 import com.anisala.chat.server.model.Session;
 
+import java.time.Instant;
+
 public class UserServiceImpl implements UserService {
 
     private UserDao userDao;
@@ -33,16 +35,24 @@ public class UserServiceImpl implements UserService {
 		    System.out.println("User logged in: " + user.getUserName());
 		} else {
 		    System.out.println("User not found: " + userName);
+            return null;
 		}
 
-		UserDto userDto = new UserDto(
+		return new UserDto(
 			user.getUserId(),
 			user.getUserName(),
 			user.getName()
 		);
-		
-		return userDto;
 	}
+
+    @Override
+    public UserDto getUserById(String userId) {
+        User user = userDao.findByUserID(userId);
+        if (user != null) {
+            return new UserDto(user.getUserId(), user.getUserName(), user.getName());
+        }
+        return null;
+    }
 
 	@Override
 	public int logoutUser(String userId) {
@@ -72,5 +82,35 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateUser(User user) {
 		// for future if this project continues
+	}
+
+	@Override
+	public boolean isOnline(String userName) {
+		User user = userDao.findByUserName(userName);
+		return user != null && user.getIsOnline() != null && user.getIsOnline();
+	}
+
+	@Override
+	public void setOnline(String userId, boolean isOnline) {
+		User user = userDao.findByUserID(userId);
+		if (user != null) {
+			user.setIsOnline(isOnline);
+			userDao.update(user);
+		}
+	}
+
+	@Override
+	public void setLastSeen(String userId, Instant lastSeen) {
+		User user = userDao.findByUserID(userId);
+		if (user != null) {
+			user.setLastSeen(lastSeen);
+			userDao.update(user);
+		}
+	}
+
+	@Override
+	public Instant getLastSeen(String userId) {
+		User user = userDao.findByUserID(userId);
+		return user != null ? user.getLastSeen() : null;
 	}
 }

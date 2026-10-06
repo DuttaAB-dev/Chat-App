@@ -40,6 +40,7 @@ public class UserTcpService implements UserService {
             return new User(obj.getUserId(), obj.getUserName(), obj.getName());
             
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -51,13 +52,23 @@ public class UserTcpService implements UserService {
             byte[] payload = Serialiser.serialize(req);
             MessageHandler.writeMessage(out, MessageType.GET_USER, payload);
 
-            Message response = MessageHandler.readMessage(in);
+                        Message response = null;
+            for (int i=0; i<200; i++) {
+                if (ChatTcpService.lastNonChatMessage != null) {
+                    response = ChatTcpService.lastNonChatMessage;
+                    ChatTcpService.lastNonChatMessage = null;
+                    break;
+                }
+                Thread.sleep(10);
+            }
+            if (response == null) return null;
             if (response.getMessageType() == MessageType.ERROR) return null;
             
             UserObj obj = Deserialiser.deserialize(response.getPayload(), UserObj.class);
             return new User(obj.getUserId(), obj.getUserName(), obj.getName());
             
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -68,10 +79,18 @@ public class UserTcpService implements UserService {
             UserObj obj = new UserObj(null, user.getUserName(), user.getName());
             byte[] payload = Serialiser.serialize(obj);
             
-            // Assuming CREATE_USER is handled by GET_USER for now, update if you add a new MessageType
-            MessageHandler.writeMessage(out, MessageType.GET_USER, payload); 
+            MessageHandler.writeMessage(out, MessageType.CREATE_USER, payload); 
 
-            Message response = MessageHandler.readMessage(in);
+                        Message response = null;
+            for (int i=0; i<200; i++) {
+                if (ChatTcpService.lastNonChatMessage != null) {
+                    response = ChatTcpService.lastNonChatMessage;
+                    ChatTcpService.lastNonChatMessage = null;
+                    break;
+                }
+                Thread.sleep(10);
+            }
+            if (response == null) return false;
             if (response.getMessageType() == MessageType.ERROR) return false;
             
             CreateUserResponse resp = Deserialiser.deserialize(response.getPayload(), CreateUserResponse.class);
@@ -99,5 +118,59 @@ public class UserTcpService implements UserService {
     @Override
     public String getCurrentUserName() {
         return currentUserName;
+    }
+
+    @Override
+    public User getUserById(String userId) {
+        try {
+            GetUserRequest req = new GetUserRequest(userId); 
+            byte[] payload = Serialiser.serialize(req);
+            MessageHandler.writeMessage(out, MessageType.GET_USER_BY_ID, payload);
+
+                        Message response = null;
+            for (int i=0; i<200; i++) {
+                if (ChatTcpService.lastNonChatMessage != null) {
+                    response = ChatTcpService.lastNonChatMessage;
+                    ChatTcpService.lastNonChatMessage = null;
+                    break;
+                }
+                Thread.sleep(10);
+            }
+            if (response == null) return null;
+            if (response.getMessageType() == MessageType.ERROR) return null;
+            
+            UserObj obj = Deserialiser.deserialize(response.getPayload(), UserObj.class);
+            return new User(obj.getUserId(), obj.getUserName(), obj.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public boolean isOnline(String userName) {
+        try {
+            CheckOnlineRequest req = new CheckOnlineRequest(userName);
+            byte[] payload = Serialiser.serialize(req);
+            MessageHandler.writeMessage(out, MessageType.CHECK_ONLINE, payload);
+
+                        Message response = null;
+            for (int i=0; i<200; i++) {
+                if (ChatTcpService.lastNonChatMessage != null) {
+                    response = ChatTcpService.lastNonChatMessage;
+                    ChatTcpService.lastNonChatMessage = null;
+                    break;
+                }
+                Thread.sleep(10);
+            }
+            if (response == null) return false;
+            if (response.getMessageType() == MessageType.ERROR) return false;
+            
+            CheckOnlineResponse resp = Deserialiser.deserialize(response.getPayload(), CheckOnlineResponse.class);
+            return resp.getIsOnline();
+            
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

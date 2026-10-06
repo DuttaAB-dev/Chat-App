@@ -20,17 +20,17 @@ public class ChatGrpcService implements ChatService {
     }
 
     @Override
-    public void startMessageListener(String username, BiConsumer<String, String> listener) {
-        this.currentUsername = username;
+    public void startMessageListener(String userId, BiConsumer<String, String> listener) {
+        this.currentUsername = userId;
         this.streamAlive = true;
 
         this.requestObserver = chatStub.chatStream(new StreamObserver<ChatMessage>() {
             @Override
             public void onNext(ChatMessage msg) {
-                if (msg.getSender().equals("System") && msg.getMessage().startsWith("[ERROR]")) {
+                if (msg.getSenderId().equals("System") && msg.getMessage().startsWith("[ERROR]")) {
                     listener.accept("System", msg.getMessage());
                 } else {
-                    listener.accept(msg.getSender(), msg.getMessage());
+                    listener.accept(msg.getSenderId(), msg.getMessage());
                 }
             }
 
@@ -65,17 +65,16 @@ public class ChatGrpcService implements ChatService {
     }
 
     @Override
-    public void sendMessage(String recipient, String message) {
+    public void sendMessage(String recipientId, String message) {
         if (requestObserver != null && currentUsername != null && streamAlive) {
             requestObserver.onNext(ChatMessage.newBuilder()
-                .setSender(currentUsername)
-                .setReceiver(recipient)
+                .setSenderId(currentUsername)
+                .setReceiverId(recipientId)
                 .setMessage(message)
                 .build());
         }
     }
 
-    @Override
     public boolean isOnline(String targetUser) {
         if (!streamAlive) return false;
         

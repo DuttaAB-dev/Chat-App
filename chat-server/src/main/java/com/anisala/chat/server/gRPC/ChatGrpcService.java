@@ -22,18 +22,18 @@ public class ChatGrpcService extends ChatServiceGrpc.ChatServiceImplBase {
         ClientEndpointImpl endpoint = new ClientEndpointImpl(responseObserver);
         
         return new StreamObserver<ChatMessage>() {
-            private String currentUserName;
+            private String currentUserID;
 
             @Override
             public void onNext(ChatMessage protoMsg) {
-                if (currentUserName == null) {
-                    currentUserName = protoMsg.getSender();
-                    chatService.registerUser(currentUserName, endpoint);
+                if (currentUserID == null) {
+                    currentUserID = protoMsg.getSenderId();
+                    chatService.registerUser(currentUserID, endpoint);
                 }
 
                 Message domainMessage = new Message(
-                        protoMsg.getSender(),
-                        protoMsg.getReceiver(),
+                        protoMsg.getSenderId(),
+                        protoMsg.getReceiverId(),
                         protoMsg.getMessage(),
                         TimestampConverter.fromProtoTimestamp(protoMsg.getTimeStamp())
                 );
@@ -43,7 +43,7 @@ public class ChatGrpcService extends ChatServiceGrpc.ChatServiceImplBase {
                         // OPTION A (Recommended for streams): Send the error back as a System message 
                         // without closing the client's connection.
                         ChatMessage errorMsg = ChatMessage.newBuilder()
-                            .setSender("System")
+                            .setSenderId("System")
                             .setMessage("[ERROR] " + e.getMessage())
                             .build();
                         responseObserver.onNext(errorMsg);
@@ -64,7 +64,7 @@ public class ChatGrpcService extends ChatServiceGrpc.ChatServiceImplBase {
             public void onCompleted() { cleanup(); }
             
             private void cleanup() {
-                if (currentUserName != null) chatService.removeUser(currentUserName);
+                if (currentUserID != null) chatService.removeUser(currentUserID);
             }
         };
     }

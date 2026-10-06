@@ -40,18 +40,16 @@ public class ChatServer {
     private static int TCP_PORT = 8081;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        
-        System.out.println("Initializing Chat Server components...");
 
-        SessionManager sessionManager = new SessionManagerImpl();
-        ChatService chatService = new ChatServiceImpl(sessionManager);
-        ChatGrpcService chatGrpcService = new ChatGrpcService(chatService);
-        ChatTcpService chatTcpService = new ChatTcpService(chatService);
+        System.out.println("Initializing Chat Server components...");
 
         SessionFactory factory = HibernateConfig.getSessionFactory();
         UserDao userDao = new UserDaoImpl(factory);
-        
+        SessionManager sessionManager = new SessionManagerImpl();
         UserService userService = new UserServiceImpl(userDao, sessionManager);
+        ChatService chatService = new ChatServiceImpl(sessionManager, userService);
+        ChatGrpcService chatGrpcService = new ChatGrpcService(chatService);
+        ChatTcpService chatTcpService = new ChatTcpService(chatService);
         UserGrpcService userGrpcService = new UserGrpcService(userService);
         UserTcpService userTcpService = new UserTcpService(userService);
 
@@ -64,10 +62,8 @@ public class ChatServer {
 
         ExecutorService clientThreadPool = Executors.newCachedThreadPool();
         ServerSocket tcpServer = new ServerSocket(TCP_PORT);
-        
+
         Thread tcpThread = new Thread(() -> {
-            //Separate thread for handling incoming TCP connections
-            // volatile boolean running = true;
             try {
                 while (!Thread.currentThread().isInterrupted())
                     try{
@@ -77,7 +73,6 @@ public class ChatServer {
                         System.out.println("TCP server closed.");
                         break;
                     }
-                    
             } catch (IOException e) {
                 System.err.println("TCP server error: ");
                 e.printStackTrace();
@@ -89,21 +84,21 @@ public class ChatServer {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down gRPC server...");
-            if (grpcServer != null) 
+            if (grpcServer != null)
                 grpcServer.shutdown();
 
             System.out.println("Shutting down TCP server...");
             try {
-                if (tcpServer != null && !tcpServer.isClosed()) 
-                    tcpServer.close(); 
-                
+                if (tcpServer != null && !tcpServer.isClosed())
+                    tcpServer.close();
+
             } catch (IOException e) {
                 System.err.println("Error closing TCP server: " + e.getMessage());
             }
 
             if (clientThreadPool != null)
                 clientThreadPool.shutdownNow();
-                
+
             HibernateConfig.shutdown();
             System.out.println("Server shut down.");
         }));
@@ -113,54 +108,53 @@ public class ChatServer {
 }
 // import io.grpc.Server;
 // import io.grpc.ServerBuilder;
-// 
+//
 // import java.io.IOException;
-// 
+//
 // public class ChatServer {
-// 
+//
 //     private static final int PORT = 50051;
-// 
+//
 //     private Server server;
-// 
+//
 //     public void start() throws IOException {
-// 
+//
 //         server = ServerBuilder
 //                 .forPort(PORT)
 //                 .addService(new ChatServiceImpl())
 //                 .build()
 //                 .start();
-// 
+//
 //         System.out.println(
 //                 "Chat server started on port " + PORT
 //         );
 //     }
-// 
+//
 //     public void stop() {
-// 
+//
 //         if (server != null) {
 //             server.shutdown()
 //         }
 //     }
-// 
+//
 //     public void blockUntilShutdown() throws InterruptedException {
-// 
+//
 //         if (server != null) {
 //             server.awaitTermination();
 //         }
 //     }
-// 
+//
 //     public static void main(String[] args) throws IOException, InterruptedException {
-// 
+//
 //         ChatServer server = new ChatServer();
-// 
+//
 //         server.start();
-// 
+//
 //         server.blockUntilShutdown();
-//         
+//
 //         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 //             System.out.println("Shutting down gRPC server...");
 //             server.stop();
 //         }));
 //     }
 // }
-

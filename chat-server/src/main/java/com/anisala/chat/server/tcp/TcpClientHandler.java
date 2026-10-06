@@ -13,7 +13,6 @@ import com.anisala.chat.tcp.dto.*;
 import com.anisala.chat.server.service.ClientEndpoint;
 import com.anisala.chat.server.exception.UserOfflineException;
 
-
 public class TcpClientHandler implements Runnable {
     private final Socket socket;
     private final ChatTcpService chatTcpService;
@@ -47,25 +46,52 @@ public class TcpClientHandler implements Runnable {
 							LogInRequest loginRequest = Deserialiser.deserialize(payload, LogInRequest.class);
 							LogInResponse loginResp = userTcpService.logIn(loginRequest);
 							MessageHandler.writeMessage(dataOutputStream, MessageType.LOGIN_RESPONSE, Serialiser.serialize(loginResp));
-							currentUserName = loginRequest.getUserName();
+							currentUserName = loginResp.getUser().getUserId(); // Route by UUID
 							chatTcpService.startChatSession(currentUserName, clientEndpoint);
 						} 
 						catch (IllegalArgumentException e) {
 							System.out.println("Login failed: " + e.getMessage());
 							MessageHandler.writeMessage(dataOutputStream, MessageType.ERROR, e.getMessage().getBytes());
 						}
-                        
                         break;
-                    // case MessageType.LOGIN_RESPONSE:
-                    //     LoginResponse loginResponse = Deserialiser.deserialize(payload, LoginResponse.class);
-                    //     
-                        // break;
+                        
+                    case MessageType.GET_USER:
+                        GetUserRequest getReq = Deserialiser.deserialize(payload, GetUserRequest.class);
+                        com.anisala.chat.server.dto.UserDto fetchedUsr = userTcpService.getUser(getReq.getUserName());
+                        if (fetchedUsr == null) {
+                            MessageHandler.writeMessage(dataOutputStream, MessageType.ERROR, "User not found".getBytes());
+                        } else {
+                            UserObj uResp = new UserObj(fetchedUsr.getUserId(), fetchedUsr.getUserName(), fetchedUsr.getName());
+                            MessageHandler.writeMessage(dataOutputStream, MessageType.USER_RESPONSE, Serialiser.serialize(uResp));
+                        }
+                        break;
+                        
+                    case MessageType.CREATE_USER:
+                        UserObj userReq = Deserialiser.deserialize(payload, UserObj.class);
+                        CreateUserResponse createResp = userTcpService.createUser(userReq);
+                        MessageHandler.writeMessage(dataOutputStream, MessageType.CREATE_USER_RESPONSE, Serialiser.serialize(createResp));
+                        break;
+
+                    case MessageType.GET_USER_BY_ID:
+                        GetUserByIdRequest byIdReq = Deserialiser.deserialize(payload, GetUserByIdRequest.class);
+                        com.anisala.chat.server.dto.UserDto fetchedUser = userTcpService.getUserById(byIdReq.getUserId());
+                        UserObj responseObj = new UserObj(fetchedUser.getUserId(), fetchedUser.getUserName(), fetchedUser.getName());
+                        MessageHandler.writeMessage(dataOutputStream, MessageType.GET_USER_BY_ID_RESPONSE, Serialiser.serialize(responseObj));
+                        break;
+
+                    case MessageType.CHECK_ONLINE:
+                        CheckOnlineRequest checkReq = Deserialiser.deserialize(payload, CheckOnlineRequest.class);
+                        boolean isOnline = userTcpService.isOnline(checkReq.getUserName());
+                        com.anisala.chat.server.dto.UserDto userToReturn = userTcpService.getUser(checkReq.getUserName());
+                        UserObj uObj = new UserObj(userToReturn.getUserId(), userToReturn.getUserName(), userToReturn.getName());
+                        CheckOnlineResponse checkResp = new CheckOnlineResponse(isOnline, uObj);
+                        MessageHandler.writeMessage(dataOutputStream, MessageType.CHECK_ONLINE_RESPONSE, Serialiser.serialize(checkResp));
+                        break;
+
                     case MessageType.MESSAGE:
-                        // GetUserRequest getUserRequest = Deserialiser.deserialize(payload, GetUserRequest.class);
-                        // userTcpService.getUser(getUserRequest)
                         ChatMessage incomingMessage = Deserialiser.deserialize(payload, ChatMessage.class);
                         try {
-                            chatTcpService.processIncomingMessage(incomingMessage); // Which calls chatService.sendMessage()
+                            chatTcpService.processIncomingMessage(incomingMessage);
                         } catch (UserOfflineException e) {
                             System.out.println("Message failed: " + e.getMessage());
                             MessageHandler.writeMessage(
