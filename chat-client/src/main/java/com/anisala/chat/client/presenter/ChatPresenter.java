@@ -61,11 +61,11 @@ public class ChatPresenter {
             String userName = view.getUserInput();
             if (userName == null || userName.isEmpty()) continue;
 
-            User user = userService.getUser(userName);
+            User user = userService.logIn(userName); // FIX: logIn directly instead of getUser, as server doesn't implement getUser
             
             if (user != null && !user.getUserName().isEmpty()) {
                 view.showText("Welcome back, " + user.getName() + "!\n");
-                currentUser = userService.logIn(userName);
+                currentUser = user;
             } else {
                 view.showText("Username '" + userName + "' not found.\n");
                 view.showText("Do you want to create a new user? (y/n): ");

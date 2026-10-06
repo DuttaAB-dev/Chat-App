@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class FileChunk {
+public class FileChunk implements DtoMarker {
     private String transferId;
     private String fileName;
     private long fileSize;

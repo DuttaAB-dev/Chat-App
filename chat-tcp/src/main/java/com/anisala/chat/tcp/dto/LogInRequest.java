@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class LogInRequest {
+public class LogInRequest implements DtoMarker {
     private String userName;
 
     public LogInRequest(String userName) {

@@ -1,5 +1,5 @@
 package com.anisala.chat.tcp.dto;
-public class LogOutResponse {
+public class LogOutResponse implements DtoMarker {
     // private boolean success;
     private String message;
 

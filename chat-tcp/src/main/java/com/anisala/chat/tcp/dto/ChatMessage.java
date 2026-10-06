@@ -2,7 +2,7 @@ package com.anisala.chat.tcp.dto;
 
 import java.time.LocalDateTime;
 
-public class ChatMessage {
+public class ChatMessage implements DtoMarker {
     private String sender;
     private String receiver;
     private String message;

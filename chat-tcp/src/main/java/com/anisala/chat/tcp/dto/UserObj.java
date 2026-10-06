@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class UserObj {
+public class UserObj implements DtoMarker {
     private String userId;
     private String userName;
     private String name;

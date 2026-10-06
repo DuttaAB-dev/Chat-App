@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class LogOutRequest {
+public class LogOutRequest implements DtoMarker {
     private String userId;
 
     public LogOutRequest(String userId) {

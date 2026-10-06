@@ -1,7 +1,7 @@
 package com.anisala.chat.tcp.dto;
 
 // unused
-public class SendMessageRequest {
+public class SendMessageRequest implements DtoMarker {
     private String message;
 
     public SendMessageRequest(String message) {

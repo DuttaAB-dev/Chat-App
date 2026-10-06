@@ -19,7 +19,7 @@ public class ChatClient {
 
     private static final int TCP_PORT = 8081;
     private static final int GRPC_PORT = 8080;
-    public static final String HOST = "localhost";
+    public static final String HOST = "127.0.0.1";
 
     private void tcpClient() throws Exception {
         System.out.println("Connecting to TCP Server at " + HOST + ":" + TCP_PORT + "...");

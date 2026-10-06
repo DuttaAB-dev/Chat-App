@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class UploadResponse {
+public class UploadResponse implements DtoMarker {
     private boolean success;
     private String transferId;
     private String message;

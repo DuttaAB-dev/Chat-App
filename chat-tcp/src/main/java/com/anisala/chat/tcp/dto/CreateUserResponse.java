@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class CreateUserResponse {
+public class CreateUserResponse implements DtoMarker {
     private boolean success;
     private String message;
     

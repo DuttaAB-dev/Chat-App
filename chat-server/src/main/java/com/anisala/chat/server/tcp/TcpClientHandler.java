@@ -45,7 +45,8 @@ public class TcpClientHandler implements Runnable {
                     case MessageType.LOGIN:
                         try {
 							LogInRequest loginRequest = Deserialiser.deserialize(payload, LogInRequest.class);
-							userTcpService.logIn(loginRequest);
+							LogInResponse loginResp = userTcpService.logIn(loginRequest);
+							MessageHandler.writeMessage(dataOutputStream, MessageType.LOGIN_RESPONSE, Serialiser.serialize(loginResp));
 							currentUserName = loginRequest.getUserName();
 							chatTcpService.startChatSession(currentUserName, clientEndpoint);
 						} 

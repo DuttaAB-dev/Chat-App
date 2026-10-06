@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class LogInResponse {
+public class LogInResponse implements DtoMarker {
     private UserObj user;
     private String message;
 

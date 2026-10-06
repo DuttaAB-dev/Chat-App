@@ -1,6 +1,6 @@
 package com.anisala.chat.tcp.dto;
 
-public class DownloadRequest {
+public class DownloadRequest implements DtoMarker {
     private String transferId;
     private String filename;
     
