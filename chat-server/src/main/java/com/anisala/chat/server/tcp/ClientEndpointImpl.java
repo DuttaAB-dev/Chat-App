@@ -9,6 +9,7 @@ import com.anisala.chat.tcp.dto.ChatMessage;
 import com.anisala.chat.tcp.MessageHandler;
 import com.anisala.chat.tcp.MessageType;
 import com.anisala.chat.tcp.Serialiser;
+import com.anisala.chat.server.model.Message;
 
 import com.anisala.chat.server.service.ClientEndpoint;
 
@@ -22,11 +23,11 @@ public class ClientEndpointImpl implements ClientEndpoint {
     }
 
     @Override
-    public void send(com.anisala.chat.server.model.Message domainMsg) {
+    public void send(Message domainMsg) {
         try {
             ChatMessage dto = new ChatMessage(
-                domainMsg.getSenderUname(),
-                domainMsg.getReceiverUname(),
+                domainMsg.getSenderId(),
+                domainMsg.getReceiverId(),
                 domainMsg.getMessage(),
                 domainMsg.getTimestamp()
             );

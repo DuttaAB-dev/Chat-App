@@ -19,8 +19,8 @@ public class ClientEndpointImpl implements ClientEndpoint {
     public void send(Message message) {
         // Map pure Java model to gRPC Protobuf model
         ChatMessage protoMessage = ChatMessage.newBuilder()
-                .setSenderId(message.getSenderUname())
-                .setReceiverId(message.getReceiverUname())
+                .setSenderId(message.getSenderId())
+                .setReceiverId(message.getReceiverId())
                 .setMessage(message.getMessage())
                 .setTimeStamp(TimestampConverter.toProtoTimestamp(message.getTimestamp()))
                 .build();

@@ -9,6 +9,7 @@ import com.anisala.chat.client.grpc.ChatGrpcService;
 import com.anisala.chat.client.grpc.UserGrpcService;
 import com.anisala.chat.client.tcp.ChatTcpService;
 import com.anisala.chat.client.tcp.UserTcpService;
+import com.anisala.chat.client.grpc.FileGrpcService;
 import com.anisala.chat.client.presenter.ChatPresenter;
 import com.anisala.chat.client.service.ChatService;
 import com.anisala.chat.client.service.UserService;
@@ -36,7 +37,7 @@ public class ChatClient {
         ChatService chatService = new ChatTcpService(out, in);
 
         ChatView view = new TerminalUi();
-        ChatPresenter presenter = new ChatPresenter(view, chatService, userService);
+        ChatPresenter presenter = new ChatPresenter(view, chatService, userService, null);
         presenter.start();
     }
 
@@ -50,12 +51,14 @@ public class ChatClient {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!channel.isShutdown()) channel.shutdownNow();
         }));
+
+        ChatView view = new TerminalUi();
         
         UserService userService = new UserGrpcService(channel);
         ChatService chatService = new ChatGrpcService(channel);
-
-        ChatView view = new TerminalUi();
-        ChatPresenter presenter = new ChatPresenter(view, chatService, userService);
+        FileGrpcService fileService = new FileGrpcService(channel, view);
+        
+        ChatPresenter presenter = new ChatPresenter(view, chatService, userService, fileService);
         presenter.start();
     }
     

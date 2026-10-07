@@ -38,7 +38,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendMessage(Message message) {
-        String receiverName = message.getReceiverUname();
+        String receiverName = message.getReceiverId();
 
         Session receiverSession = sessionManager.getSession(receiverName);
         if (receiverSession == null) {

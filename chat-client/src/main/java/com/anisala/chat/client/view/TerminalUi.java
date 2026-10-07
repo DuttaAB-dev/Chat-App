@@ -53,7 +53,7 @@ public class TerminalUi implements ChatView{
     
     @Override
     public void showPrompt(){
-        System.out.print(" > ");
+        System.out.print(">");
     }
     
     @Override

@@ -3,12 +3,20 @@ package com.anisala.chat.client.presenter;
 import com.anisala.chat.client.model.User;
 import com.anisala.chat.client.service.ChatService;
 import com.anisala.chat.client.service.UserService;
+import com.anisala.chat.client.grpc.FileGrpcService;
 import com.anisala.chat.client.view.ChatView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.UUID;
 
 public class ChatPresenter {
     private final ChatView view;
     private final ChatService chatService;
     private final UserService userService;
+    private final FileGrpcService fileService;
     
     // State moves here, away from the UI
     private User currentUser;
@@ -16,13 +24,18 @@ public class ChatPresenter {
     private String activeRecipientId;
     private java.util.Map<String, String> idToNameMap = new java.util.HashMap<>();
     private String pendingFileSender;
+    private String pendingTransferId;
+    private String pendingUploadFilePath;
+    private String pendingUploadReceiver;
+    private String fileName;
     // ... other state variables ...
     private boolean isChatting;
 
-    public ChatPresenter(ChatView view, ChatService chatService, UserService userService) {
+    public ChatPresenter(ChatView view, ChatService chatService, UserService userService, FileGrpcService fileService) {
         this.view = view;
         this.chatService = chatService;
         this.userService = userService;
+        this.fileService = fileService;
     }
 
     public void start() {
@@ -33,7 +46,7 @@ public class ChatPresenter {
     }
 
     private void chatLoop() {
-        view.showSystemMessage("\n--- Chat Started ---");
+        view.showSystemMessage(" Chat Started ");
         view.showSystemMessage("Commands: /chat <user>, /sendfile <path>, /accept, /reject, /logout, /quit\n");
         chatService.startMessageListener(currentUser.getUserId(), this::handleIncomingMessage);
         isChatting = true;
@@ -112,42 +125,46 @@ public class ChatPresenter {
                 break;
                 
             case "/sendfile":
-                // if (activeRecipient == null) {
-                //     System.out.println("[System] Please select a user to chat with first using '/chat <username>'");
-                // } else if (parts.length > 1) {
-                //     File file = new File(parts[1]);
-                //     if (!file.exists()) {
-                //         System.out.println("[System] File not found: " + file.getAbsolutePath());
-                //         break;
-                //     }
-                //     pendingUploadPath = file.getAbsolutePath();
-                //     pendingUploadReceiver = activeRecipient;
-                //     
-                //     System.out.println("[System] Asking " + activeRecipient + " for permission to send " + file.getName() + "...");
-                //     chatManager.sendMessage(currentUser.getUserName(), activeRecipient, "[FILE_REQ] " + file.getName());
-                // } else {
-                //     System.out.println("[System] Usage: /sendfile <path>");
-                // }
+                if (activeRecipientId == null) {
+                    view.showSystemMessage("Please select a user to chat with first using '/chat <username>'");
+                } else if (parts.length > 1) {
+                    File file = new File(parts[1]);
+                    if (!file.exists()) {
+                        view.showSystemMessage("[System] File not found: " + parts[1]);
+                        break;
+                    }
+                    pendingUploadFilePath = file.getAbsolutePath();
+                    pendingUploadReceiver = activeRecipientId;
+                    pendingTransferId = UUID.randomUUID().toString();
+                    
+                    view.showSystemMessage("Asking " + activeRecipient + " for permission to send " + file.getName() + "...");
+                    // chatService.sendMessage(activeRecipient, "[FILE_REQ] " + file.getName());
+                    fileService.sendTransferRequest(file.getName(), pendingUploadReceiver, pendingTransferId);
+                } else {
+                    view.showSystemMessage("Usage: /sendfile <path>");
+                }
                 break;
                 
             case "/accept":
-                // if (pendingFileSender != null) {
-                //     System.out.println("[System] Accepted file from " + pendingFileSender + ". Waiting for them to upload...");
-                //     chatManager.sendMessage(currentUser.getUserName(), pendingFileSender, "[FILE_ACCEPT]");
-                // } else {
-                //     System.out.println("[System] No pending file requests.");
-                // }
+                if (pendingFileSender != null && pendingTransferId != null) {
+                    view.showSystemMessage("Accepted file. Connecting stream...");
+                    fileService.startReceiving(pendingTransferId, fileName);
+                    chatService.sendMessage(activeRecipientId, "[FILE_ACCEPT:" + pendingTransferId + "]");
+                    pendingFileSender = null;
+                    pendingTransferId = null;
+                } else {
+                    view.showSystemMessage("No pending file requests.");
+                }
                 break;
 
             case "/reject":
-                // if (pendingFileSender != null) {
-                //     System.out.println("[System] Rejected file from " + pendingFileSender + ".");
-                //     chatManager.sendMessage(currentUser.getUserName(), pendingFileSender, "[FILE_REJECT]");
-                //     pendingFileSender = null;
-                //     pendingFileName = null;
-                // } else {
-                //     System.out.println("[System] No pending file requests.");
-                // }
+                if (pendingFileSender != null) {
+                    chatService.sendMessage(activeRecipientId, "[FILE_REJECT]");
+                    view.showSystemMessage("Rejected file request.");
+                    pendingFileSender = null;
+                } else {
+                    view.showSystemMessage("No pending file requests.");
+                }
                 break;
 
             case "/logout":
@@ -158,14 +175,14 @@ public class ChatPresenter {
                 break;
                 
             case "/quit":
-                System.out.println("Exiting...");
+                view.showSystemMessage("Exiting...");
                 userService.logOut(currentUser.getUserId());
                 chatService.stopMessageListener();
                 System.exit(0);
                 break;
                 
             default:
-                System.out.println("[System] Unknown command.");
+                view.showSystemMessage("Unknown command.");
         }
     }
 
@@ -178,6 +195,33 @@ public class ChatPresenter {
             return;
         }
 
+        if (senderId.equals("System") && message.startsWith("[FILE_REQ:")) {
+            String[] reqParts = message.substring(10, message.length() - 1).split(":");
+            pendingTransferId = reqParts[0];
+            fileName = reqParts[1];
+            pendingFileSender = activeRecipientId; // Assuming current chat partner
+            view.showFileRequest(activeRecipient != null ? activeRecipient : "Someone", fileName);
+            return;
+        }
+
+        // Catch the Accept notification
+        if (message.startsWith("[FILE_ACCEPT:")) {
+            String acceptedId = message.substring(13, message.length() - 1);
+            if (acceptedId.equals(pendingTransferId) && pendingUploadFilePath != null) {
+                view.showSystemMessage("File accepted! Starting upload...");
+                fileService.startSending(pendingUploadFilePath, pendingTransferId);
+                pendingUploadFilePath = null;
+            }
+            return;
+        }
+
+        // Catch the Reject notification
+        if (message.equals("[FILE_REJECT]")) {
+            view.showSystemMessage("Your file transfer was rejected.");
+            pendingUploadFilePath = null;
+            return;
+        }
+        
         String displaySender = idToNameMap.get(senderId);
         if (displaySender == null && !senderId.equals("System")) {
             new Thread(() -> {

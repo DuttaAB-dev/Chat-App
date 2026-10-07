@@ -2,6 +2,7 @@ package com.anisala.chat.server;
 
 import com.anisala.chat.server.gRPC.ChatGrpcService;
 import com.anisala.chat.server.gRPC.UserGrpcService;
+import com.anisala.chat.server.gRPC.FileGrpcService;
 
 import com.anisala.chat.server.tcp.ChatTcpService;
 import com.anisala.chat.server.tcp.UserTcpService;
@@ -31,7 +32,7 @@ import java.net.ServerSocket;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+import java.io.File;
 import java.io.IOException;
 
 public class ChatServer {
@@ -48,14 +49,17 @@ public class ChatServer {
         SessionManager sessionManager = new SessionManagerImpl();
         UserService userService = new UserServiceImpl(userDao, sessionManager);
         ChatService chatService = new ChatServiceImpl(sessionManager, userService);
+        
         ChatGrpcService chatGrpcService = new ChatGrpcService(chatService);
         ChatTcpService chatTcpService = new ChatTcpService(chatService);
         UserGrpcService userGrpcService = new UserGrpcService(userService);
         UserTcpService userTcpService = new UserTcpService(userService);
-
+        FileGrpcService fileTransferService = new FileGrpcService(chatService);
+        
         Server grpcServer = ServerBuilder.forPort(GRPC_PORT)
                 .addService(chatGrpcService)
                 .addService(userGrpcService)
+                .addService(fileTransferService)
                 .addService(ProtoReflectionService.newInstance())
                 .build()
                 .start();
