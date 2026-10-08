@@ -25,7 +25,7 @@ public class ChatClient {
     private void tcpClient() throws Exception {
         System.out.println("Connecting to TCP Server at " + HOST + ":" + TCP_PORT + "...");
         Socket socket = new Socket(HOST, TCP_PORT);
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try { if (!socket.isClosed()) socket.close(); } catch (Exception e) {}
         }));
@@ -47,21 +47,21 @@ public class ChatClient {
                 .forAddress(HOST, GRPC_PORT)
                 .usePlaintext()
                 .build();
-                
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!channel.isShutdown()) channel.shutdownNow();
         }));
 
         ChatView view = new TerminalUi();
-        
+
         UserService userService = new UserGrpcService(channel);
         ChatService chatService = new ChatGrpcService(channel);
         FileGrpcService fileService = new FileGrpcService(channel, view);
-        
+
         ChatPresenter presenter = new ChatPresenter(view, chatService, userService, fileService);
         presenter.start();
     }
-    
+
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: java -jar app.jar --tcp | --grpc");

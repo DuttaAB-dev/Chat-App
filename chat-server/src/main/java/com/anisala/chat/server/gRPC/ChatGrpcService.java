@@ -31,6 +31,10 @@ public class ChatGrpcService extends ChatServiceGrpc.ChatServiceImplBase {
                     chatService.registerUser(currentUserID, endpoint);
                 }
 
+                // handling the connection message sent to server
+                if ("System".equals(protoMsg.getReceiverId()))
+                    return;
+                    
                 Message domainMessage = new Message(
                         protoMsg.getSenderId(),
                         protoMsg.getReceiverId(),

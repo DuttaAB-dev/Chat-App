@@ -204,7 +204,6 @@ public class ChatPresenter {
             return;
         }
 
-        // Catch the Accept notification
         if (message.startsWith("[FILE_ACCEPT:")) {
             String acceptedId = message.substring(13, message.length() - 1);
             if (acceptedId.equals(pendingTransferId) && pendingUploadFilePath != null) {
@@ -215,7 +214,6 @@ public class ChatPresenter {
             return;
         }
 
-        // Catch the Reject notification
         if (message.equals("[FILE_REJECT]")) {
             view.showSystemMessage("Your file transfer was rejected.");
             pendingUploadFilePath = null;
