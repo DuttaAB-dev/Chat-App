@@ -20,7 +20,11 @@ public class ChatClient {
 
     private static final int TCP_PORT = 8081;
     private static final int GRPC_PORT = 8080;
-    public static final String HOST = "127.0.0.1";
+    public  final String HOST;
+
+    private ChatClient(String HOST){
+        this.HOST = HOST;
+    }
 
     private void tcpClient() throws Exception {
         System.out.println("Connecting to TCP Server at " + HOST + ":" + TCP_PORT + "...");
@@ -63,12 +67,20 @@ public class ChatClient {
     }
 
     public static void main(String[] args) {
+
+        String host;
+        
         if (args.length == 0) {
             System.out.println("Usage: java -jar app.jar --tcp | --grpc");
             return;
         }
 
-        ChatClient client = new ChatClient();
+        if (args.length == 3 && args[1].equals("--host"))
+            host = args[2];
+        else 
+            host = "127.0.0.1";
+        
+        ChatClient client = new ChatClient(host);
         switch (args[0]) {
             case "--tcp":
                 try {
@@ -92,5 +104,6 @@ public class ChatClient {
                 System.out.println("Usage: java -jar app.jar --tcp | --grpc");
                 break;
         }
+            
     }
 }
