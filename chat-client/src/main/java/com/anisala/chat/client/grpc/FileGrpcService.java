@@ -80,30 +80,33 @@ public class FileGrpcService {
         long totalChunks = (long) Math.ceil((double) fileSize / CHUNK_SIZE);
 
         StreamObserver<FileChunk> reqObserver = fileStub.uploadFile(new StreamObserver<UploadResponse>() {
-            @Override public void onNext(UploadResponse r) {}
+            @Override public void onNext(UploadResponse ur) {}
             @Override public void onError(Throwable t) { view.showSystemMessage("Upload failed."); }
             @Override public void onCompleted() {}
         });
-
-        new Thread(() -> {
-            try (FileInputStream fis = new FileInputStream(file)) {
-                byte[] buffer = new byte[CHUNK_SIZE];
-                int bytesRead;
-                long chunkNum = 1;
-                while ((bytesRead = fis.read(buffer)) != -1) {
-                    reqObserver.onNext(FileChunk.newBuilder()
-                            .setTransferId(transferId).setFileName(file.getName())
-                            .setFileSize(fileSize).setChunkSize(bytesRead)
-                            .setChunkNumber(chunkNum).setTotalChunks(totalChunks)
-                            .setData(ByteString.copyFrom(buffer, 0, bytesRead))
-                            .setLastChunk(chunkNum == totalChunks).build());
-                    
-                    view.showFileTransferProgress(file.getName(), (int) (((double) chunkNum / totalChunks) * 100));
-                    if (chunkNum == totalChunks) view.showFileTransferComplete(file.getName());
-                    chunkNum++;
-                }
-                reqObserver.onCompleted();
-            } catch (Exception e) { reqObserver.onError(e); }
-        }).start();
+        
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[CHUNK_SIZE];
+            int bytesRead;
+            long chunkNum = 1;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                reqObserver.onNext(FileChunk.newBuilder()
+                        .setTransferId(transferId)
+                        .setFileName(file.getName())
+                        .setFileSize(fileSize)
+                        .setChunkSize(bytesRead)
+                        .setChunkNumber(chunkNum)
+                        .setTotalChunks(totalChunks)
+                        .setData(ByteString.copyFrom(buffer, 0, bytesRead))
+                        .setLastChunk(chunkNum == totalChunks)
+                        .build()
+                );
+                
+                view.showFileTransferProgress(file.getName(), (int) (((double) chunkNum / totalChunks) * 100));
+                if (chunkNum == totalChunks) view.showFileTransferComplete(file.getName());
+                chunkNum++;
+            }
+            reqObserver.onCompleted();
+        } catch (Exception e) { reqObserver.onError(e); }
     }
 }
